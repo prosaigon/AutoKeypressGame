@@ -1,0 +1,212 @@
+<Window x:Class="AutoClicker.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Auto Clicker & Keyboard - Modern Auto Tool" 
+        Height="700" Width="900"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource BackgroundBrush}">
+    
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    </Window.Resources>
+    
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        
+        <!-- Header -->
+        <Border Grid.Row="0" Background="{StaticResource SurfaceBrush}" CornerRadius="8" Padding="20" Margin="0,0,0,15">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1" />
+            </Border.Effect>
+            <StackPanel>
+                <TextBlock Text="🎮 Auto Clicker & Keyboard" FontSize="28" FontWeight="Bold" 
+                           Foreground="{StaticResource PrimaryBrush}" HorizontalAlignment="Center" />
+                <TextBlock Text="Automate your gaming experience with keyboard and mouse automation" 
+                           FontSize="14" Foreground="#666666" HorizontalAlignment="Center" Margin="0,5,0,0" />
+            </StackPanel>
+        </Border>
+        
+        <!-- Main Content -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            
+            <!-- Left Panel - Action List -->
+            <Border Grid.Column="0" Background="{StaticResource SurfaceBrush}" CornerRadius="8" Padding="15" Margin="0,0,10,0">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1" />
+                </Border.Effect>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    
+                    <TextBlock Grid.Row="0" Text="📋 Action Sequence" FontSize="18" FontWeight="SemiBold" 
+                               Foreground="#333333" Margin="0,0,0,10" />
+                    
+                    <ListBox Grid.Row="1" ItemsSource="{Binding Actions}" SelectedItem="{Binding SelectedAction}"
+                             BorderThickness="0" Background="Transparent"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="#F5F5F5" CornerRadius="6" Padding="12" Margin="0,0,0,8">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <TextBlock Grid.Column="0" Text="{Binding ActionType}" FontWeight="Bold" 
+                                                   Foreground="{StaticResource PrimaryBrush}" VerticalAlignment="Center" />
+                                        <StackPanel Grid.Column="1" Margin="15,0,0,0">
+                                            <TextBlock Text="{Binding DisplayValue}" FontSize="13" Foreground="#333333" />
+                                            <TextBlock Text="{Binding DisplayDelay}" FontSize="11" Foreground="#888888" />
+                                        </StackPanel>
+                                        <Button Grid.Column="2" Content="🗑️" Command="{Binding DataContext.DeleteActionCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" 
+                                                CommandParameter="{Binding}" Style="{StaticResource ModernButton}"
+                                                Padding="8,4" FontSize="12" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+                        <Button Content="⌨️ Add Key" Command="{Binding AddKeyboardActionCommand}" 
+                                Style="{StaticResource ModernButton}" Margin="0,0,5,0" />
+                        <Button Content="🖱️ Add Click" Command="{Binding AddClickActionCommand}" 
+                                Style="{StaticResource ModernButton}" Margin="5,0,5,0" />
+                        <Button Content="📍 Get Position" Command="{Binding GetCursorPositionCommand}" 
+                                Style="{StaticResource ModernButton}" Margin="5,0,0,0" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+            
+            <!-- Separator -->
+            <GridSplitter Grid.Column="1" Width="5" Background="Transparent" HorizontalAlignment="Stretch" />
+            
+            <!-- Right Panel - Settings -->
+            <Border Grid.Column="2" Background="{StaticResource SurfaceBrush}" CornerRadius="8" Padding="15" Margin="10,0,0,0">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1" />
+                </Border.Effect>
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="⚙️ Settings" FontSize="18" FontWeight="SemiBold" 
+                                   Foreground="#333333" Margin="0,0,0,15" />
+                        
+                        <!-- Loop Settings -->
+                        <GroupBox Header="🔄 Loop Settings" BorderBrush="#DDDDDD" Margin="0,0,0,15">
+                            <StackPanel Margin="10">
+                                <ComboBox ItemsSource="{Binding LoopModes}" SelectedItem="{Binding SelectedLoopMode}" 
+                                          Style="{StaticResource ModernComboBox}" Margin="0,0,0,10" />
+                                
+                                <StackPanel Orientation="Horizontal" Visibility="{Binding IsCustomLoopVisible, Converter={StaticResource BoolToVis}}">
+                                    <TextBlock Text="Iterations:" VerticalAlignment="Center" Margin="0,0,10,0" />
+                                    <TextBox Text="{Binding LoopIterations}" Width="100" Style="{StaticResource ModernTextBox}" />
+                                </StackPanel>
+                            </StackPanel>
+                        </GroupBox>
+                        
+                        <!-- Delay Settings -->
+                        <GroupBox Header="⏱️ Default Delay" BorderBrush="#DDDDDD" Margin="0,0,0,15">
+                            <StackPanel Margin="10">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Delay (ms):" VerticalAlignment="Center" Margin="0,0,10,0" />
+                                    <TextBox Text="{Binding DefaultDelay}" Width="100" Style="{StaticResource ModernTextBox}" />
+                                </StackPanel>
+                            </StackPanel>
+                        </GroupBox>
+                        
+                        <!-- Hotkey Settings -->
+                        <GroupBox Header="⌨️ Hotkeys" BorderBrush="#DDDDDD" Margin="0,0,0,15">
+                            <StackPanel Margin="10">
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                    <TextBlock Text="Start/Stop:" VerticalAlignment="Center" Margin="0,0,10,0" Width="80" />
+                                    <TextBox Text="{Binding StartStopHotkey}" Width="150" Style="{StaticResource ModernTextBox}" 
+                                             IsReadOnly="True" PreviewKeyDown="HotkeyTextBox_PreviewKeyDown" />
+                                </StackPanel>
+                                <TextBlock Text="Press desired key combination" FontSize="11" Foreground="#888888" 
+                                           Margin="90,0,0,0" />
+                            </StackPanel>
+                        </GroupBox>
+                        
+                        <!-- Status -->
+                        <GroupBox Header="📊 Status" BorderBrush="#DDDDDD">
+                            <StackPanel Margin="10">
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                    <TextBlock Text="Status:" FontWeight="SemiBold" Margin="0,0,10,0" />
+                                    <TextBlock Text="{Binding StatusText}" Foreground="{StaticResource PrimaryBrush}" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                    <TextBlock Text="Progress:" FontWeight="SemiBold" Margin="0,0,10,0" />
+                                    <TextBlock Text="{Binding ProgressText}" />
+                                </StackPanel>
+                                <ProgressBar Value="{Binding ProgressValue}" Maximum="100" Height="8" 
+                                             Margin="0,5,0,0" />
+                            </StackPanel>
+                        </GroupBox>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+        
+        <!-- Bottom Control Panel -->
+        <Border Grid.Row="2" Background="{StaticResource SurfaceBrush}" CornerRadius="8" Padding="20" Margin="0,15,0,0">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1" />
+            </Border.Effect>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Content="▶️ Start" Command="{Binding StartCommand}" 
+                            Style="{StaticResource ModernButton}" 
+                            Background="{StaticResource PrimaryBrush}"
+                            IsEnabled="{Binding CanStart}" 
+                            Padding="20,10" FontSize="16" />
+                    <Button Content="⏹️ Stop" Command="{Binding StopCommand}" 
+                            Style="{StaticResource ModernButton}" 
+                            Background="{StaticResource ErrorBrush}"
+                            IsEnabled="{Binding CanStop}" 
+                            Margin="10,0,0,0" 
+                            Padding="20,10" FontSize="16" />
+                </StackPanel>
+                
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <CheckBox Content="🔊 Sound Notification" IsChecked="{Binding PlaySound}" 
+                              VerticalAlignment="Center" FontSize="14" />
+                </StackPanel>
+                
+                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Button Content="💾 Save Config" Command="{Binding SaveConfigCommand}" 
+                            Style="{StaticResource ModernButton}" 
+                            Background="#FF03DAC6"
+                            Margin="0,0,10,0"
+                            Padding="15,10" />
+                    <Button Content="📂 Load Config" Command="{Binding LoadConfigCommand}" 
+                            Style="{StaticResource ModernButton}" 
+                            Background="#FF6200EE"
+                            Padding="15,10" />
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
