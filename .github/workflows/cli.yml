@@ -1,0 +1,31 @@
+name: .NET CLI Build & Test
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    name: Build & Test Solution
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Restore Dependencies
+      run: dotnet restore AutoKeypressGame.sln
+
+    - name: Build Solution
+      run: dotnet build AutoKeypressGame.sln --configuration Release --no-restore
+
+    - name: Run Unit & Auto Tests
+      run: dotnet test AutoKeypressGame.sln --configuration Release --no-build --verbosity normal

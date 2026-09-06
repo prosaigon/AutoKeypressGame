@@ -23,7 +23,7 @@ namespace AutoClicker.Services
         [StructLayout(LayoutKind.Sequential)]
         public struct INPUT
         {
-            public int type;
+            public uint type;
             public InputUnion U;
         }
 
@@ -67,9 +67,9 @@ namespace AutoClicker.Services
             public short wParamH;
         }
 
-        public const int INPUT_MOUSE = 0;
-        public const int INPUT_KEYBOARD = 1;
-        public const int INPUT_HARDWARE = 2;
+        public const uint INPUT_MOUSE = 0;
+        public const uint INPUT_KEYBOARD = 1;
+        public const uint INPUT_HARDWARE = 2;
 
         public const uint KEYEVENTF_KEYUP = 0x0002;
         public const uint KEYEVENTF_EXTENDEDKEY = 0x0001;
@@ -300,17 +300,45 @@ namespace AutoClicker.Services
                     break;
             }
             
-            // Small delay after moving
             System.Threading.Thread.Sleep(10);
-            
-            // Mouse down
-            mouse_event(downFlag, 0, 0, 0, UIntPtr.Zero);
-            
-            // Small delay
-            System.Threading.Thread.Sleep(10);
-            
-            // Mouse up
-            mouse_event(upFlag, 0, 0, 0, UIntPtr.Zero);
+
+            INPUT[] inputs = new INPUT[2];
+
+            inputs[0] = new INPUT
+            {
+                type = INPUT_MOUSE,
+                U = new InputUnion
+                {
+                    mi = new MOUSEINPUT
+                    {
+                        dx = 0,
+                        dy = 0,
+                        mouseData = 0,
+                        dwFlags = downFlag,
+                        time = 0,
+                        dwExtraInfo = IntPtr.Zero
+                    }
+                }
+            };
+
+            inputs[1] = new INPUT
+            {
+                type = INPUT_MOUSE,
+                U = new InputUnion
+                {
+                    mi = new MOUSEINPUT
+                    {
+                        dx = 0,
+                        dy = 0,
+                        mouseData = 0,
+                        dwFlags = upFlag,
+                        time = 0,
+                        dwExtraInfo = IntPtr.Zero
+                    }
+                }
+            };
+
+            SendInput(2, inputs, Marshal.SizeOf<INPUT>());
         }
 
         public static void GetCursorPosition(out int x, out int y)
@@ -335,7 +363,17 @@ namespace AutoClicker.Services
 
         public static ushort GetVirtualKeyCode(string key)
         {
+            if (string.IsNullOrWhiteSpace(key))
+                return VirtualKeys.VK_A;
+
             string upperKey = key.ToUpper().Trim();
+            
+            // Handle combinations like "CTRL+F6" -> extract main key "F6"
+            if (upperKey.Contains("+"))
+            {
+                string[] parts = upperKey.Split('+');
+                upperKey = parts[parts.Length - 1].Trim();
+            }
             
             switch (upperKey)
             {
@@ -404,8 +442,26 @@ namespace AutoClicker.Services
                 case "F10": return VirtualKeys.VK_F10;
                 case "F11": return VirtualKeys.VK_F11;
                 case "F12": return VirtualKeys.VK_F12;
+                case "NUMPAD0": return VirtualKeys.VK_NUMPAD0;
+                case "NUMPAD1": return VirtualKeys.VK_NUMPAD1;
+                case "NUMPAD2": return VirtualKeys.VK_NUMPAD2;
+                case "NUMPAD3": return VirtualKeys.VK_NUMPAD3;
+                case "NUMPAD4": return VirtualKeys.VK_NUMPAD4;
+                case "NUMPAD5": return VirtualKeys.VK_NUMPAD5;
+                case "NUMPAD6": return VirtualKeys.VK_NUMPAD6;
+                case "NUMPAD7": return VirtualKeys.VK_NUMPAD7;
+                case "NUMPAD8": return VirtualKeys.VK_NUMPAD8;
+                case "NUMPAD9": return VirtualKeys.VK_NUMPAD9;
+                case "NUMLOCK": return VirtualKeys.VK_NUMLOCK;
+                case ",": return 0xBC; // VK_OEM_COMMA
+                case ".": return 0xBE; // VK_OEM_PERIOD
+                case "-": return 0xBD; // VK_OEM_MINUS
+                case "=": return 0xBB; // VK_OEM_PLUS
+                case "/": return 0xBF; // VK_OEM_2
+                case ";": return 0xBA; // VK_OEM_1
+                case "[": return 0xDB; // VK_OEM_4
+                case "]": return 0xDD; // VK_OEM_6
                 default:
-                    // Try to get first character
                     if (upperKey.Length > 0)
                     {
                         char c = upperKey[0];
@@ -414,7 +470,7 @@ namespace AutoClicker.Services
                         if (c >= '0' && c <= '9')
                             return (ushort)(VirtualKeys.VK_0 + (c - '0'));
                     }
-                    return VirtualKeys.VK_A; // Default
+                    return VirtualKeys.VK_A;
             }
         }
 

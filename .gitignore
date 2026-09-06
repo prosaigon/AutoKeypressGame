@@ -1,4 +1,11 @@
-```
-# No build artifacts, dependencies, or temp files detected in changes
-# Source files only (.md) - no ignores needed
-```
+# Visual Studio & .NET Build Artifacts
+[Bb]in/
+[Oo]bj/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+publish_output/
+*.zip
+config.ini

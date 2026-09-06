@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Auto Clicker & Keyboard - Modern Auto Tool" 
+        Title="Auto Clicker &amp; Keyboard - Modern Auto Tool" 
         Height="700" Width="900"
         WindowStartupLocation="CenterScreen"
         Background="{StaticResource BackgroundBrush}">
@@ -26,8 +26,12 @@
                 <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1" />
             </Border.Effect>
             <StackPanel>
-                <TextBlock Text="🎮 Auto Clicker & Keyboard" FontSize="28" FontWeight="Bold" 
-                           Foreground="{StaticResource PrimaryBrush}" HorizontalAlignment="Center" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <TextBlock Text="🎮 Auto Clicker &amp; Keyboard" FontSize="28" FontWeight="Bold" 
+                               Foreground="{StaticResource PrimaryBrush}" />
+                    <TextBlock Text="{Binding AppVersion}" FontSize="16" FontWeight="SemiBold" 
+                               Foreground="{StaticResource PrimaryBrush}" Margin="10,0,0,0" VerticalAlignment="Bottom" />
+                </StackPanel>
                 <TextBlock Text="Automate your gaming experience with keyboard and mouse automation" 
                            FontSize="14" Foreground="#666666" HorizontalAlignment="Center" Margin="0,5,0,0" />
             </StackPanel>
@@ -53,8 +57,13 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     
-                    <TextBlock Grid.Row="0" Text="📋 Action Sequence" FontSize="18" FontWeight="SemiBold" 
-                               Foreground="#333333" Margin="0,0,0,10" />
+                    <Grid Grid.Row="0" Margin="0,0,0,10">
+                        <TextBlock Text="📋 Action Sequence" FontSize="18" FontWeight="SemiBold" 
+                                   Foreground="#333333" VerticalAlignment="Center" />
+                        <Button Content="🗑️ Clear All" Command="{Binding ClearActionsCommand}" 
+                                Style="{StaticResource ModernButton}" HorizontalAlignment="Right"
+                                Padding="8,4" FontSize="12" Background="#FF757575" ToolTip="Clear all actions" />
+                    </Grid>
                     
                     <ListBox Grid.Row="1" ItemsSource="{Binding Actions}" SelectedItem="{Binding SelectedAction}"
                              BorderThickness="0" Background="Transparent"
@@ -132,15 +141,45 @@
                         </GroupBox>
                         
                         <!-- Hotkey Settings -->
-                        <GroupBox Header="⌨️ Hotkeys" BorderBrush="#DDDDDD" Margin="0,0,0,15">
+                        <GroupBox Header="⌨️ Quick-Control Hotkeys" BorderBrush="#DDDDDD" Margin="0,0,0,15">
                             <StackPanel Margin="10">
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                                    <TextBlock Text="Start/Stop:" VerticalAlignment="Center" Margin="0,0,10,0" Width="80" />
-                                    <TextBox Text="{Binding StartStopHotkey}" Width="150" Style="{StaticResource ModernTextBox}" 
-                                             IsReadOnly="True" PreviewKeyDown="HotkeyTextBox_PreviewKeyDown" />
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                    <TextBlock Text="▶️ Start / ⏹️ Stop:" VerticalAlignment="Center" Margin="0,0,5,0" Width="130" ToolTip="Default: F6" />
+                                    <TextBox Text="{Binding StartStopHotkey}" Tag="StartStopHotkey" Width="90" Style="{StaticResource ModernTextBox}" 
+                                             IsReadOnly="True" PreviewKeyDown="HotkeyTextBox_PreviewKeyDown" 
+                                             GotFocus="HotkeyTextBox_GotFocus" LostFocus="HotkeyTextBox_LostFocus" />
+                                    <Button Content="↺" Command="{Binding ResetStartStopHotkeyCommand}" Style="{StaticResource ModernButton}" 
+                                            Width="30" Margin="5,0,0,0" ToolTip="Reset to default (F6)" Padding="0" />
                                 </StackPanel>
-                                <TextBlock Text="Press desired key combination" FontSize="11" Foreground="#888888" 
-                                           Margin="90,0,0,0" />
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                    <TextBlock Text="🔴 Record / ⏹️ Stop:" VerticalAlignment="Center" Margin="0,0,5,0" Width="130" ToolTip="Default: F7" />
+                                    <TextBox Text="{Binding RecordHotkey}" Tag="RecordHotkey" Width="90" Style="{StaticResource ModernTextBox}" 
+                                             IsReadOnly="True" PreviewKeyDown="HotkeyTextBox_PreviewKeyDown" 
+                                             GotFocus="HotkeyTextBox_GotFocus" LostFocus="HotkeyTextBox_LostFocus" />
+                                    <Button Content="↺" Command="{Binding ResetRecordHotkeyCommand}" Style="{StaticResource ModernButton}" 
+                                            Width="30" Margin="5,0,0,0" ToolTip="Reset to default (F7)" Padding="0" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                    <TextBlock Text="⏸️ Pause / ▶️ Resume:" VerticalAlignment="Center" Margin="0,0,5,0" Width="130" ToolTip="Default: F8" />
+                                    <TextBox Text="{Binding PauseResumeHotkey}" Tag="PauseResumeHotkey" Width="90" Style="{StaticResource ModernTextBox}" 
+                                             IsReadOnly="True" PreviewKeyDown="HotkeyTextBox_PreviewKeyDown" 
+                                             GotFocus="HotkeyTextBox_GotFocus" LostFocus="HotkeyTextBox_LostFocus" />
+                                    <Button Content="↺" Command="{Binding ResetPauseResumeHotkeyCommand}" Style="{StaticResource ModernButton}" 
+                                            Width="30" Margin="5,0,0,0" ToolTip="Reset to default (F8)" Padding="0" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                    <TextBlock Text="🗑️ Clear Actions:" VerticalAlignment="Center" Margin="0,0,5,0" Width="130" ToolTip="Default: F9" />
+                                    <TextBox Text="{Binding ClearActionsHotkey}" Tag="ClearActionsHotkey" Width="90" Style="{StaticResource ModernTextBox}" 
+                                             IsReadOnly="True" PreviewKeyDown="HotkeyTextBox_PreviewKeyDown" 
+                                             GotFocus="HotkeyTextBox_GotFocus" LostFocus="HotkeyTextBox_LostFocus" />
+                                    <Button Content="↺" Command="{Binding ResetClearActionsHotkeyCommand}" Style="{StaticResource ModernButton}" 
+                                            Width="30" Margin="5,0,0,0" ToolTip="Reset to default (F9)" Padding="0" />
+                                </StackPanel>
+                                <Button Content="🔄 Reset All Hotkeys" Command="{Binding ResetAllHotkeysCommand}" 
+                                        Style="{StaticResource ModernButton}" HorizontalAlignment="Center" Margin="0,5,0,0" 
+                                        Padding="10,4" FontSize="12" Background="#FF757575" />
+                                <TextBlock Text="Click input box and press hotkey combination to edit" FontSize="11" Foreground="#888888" 
+                                           Margin="0,5,0,0" HorizontalAlignment="Center" />
                             </StackPanel>
                         </GroupBox>
                         
@@ -181,13 +220,24 @@
                             Style="{StaticResource ModernButton}" 
                             Background="{StaticResource PrimaryBrush}"
                             IsEnabled="{Binding CanStart}" 
-                            Padding="20,10" FontSize="16" />
+                            Padding="15,10" FontSize="15" />
                     <Button Content="⏹️ Stop" Command="{Binding StopCommand}" 
                             Style="{StaticResource ModernButton}" 
                             Background="{StaticResource ErrorBrush}"
                             IsEnabled="{Binding CanStop}" 
-                            Margin="10,0,0,0" 
-                            Padding="20,10" FontSize="16" />
+                            Margin="8,0,0,0" 
+                            Padding="15,10" FontSize="15" />
+                    <Button Content="{Binding PauseButtonText}" Command="{Binding PauseCommand}" 
+                            Style="{StaticResource ModernButton}" 
+                            Background="#FFFF9800"
+                            IsEnabled="{Binding IsRunning}"
+                            Margin="8,0,0,0" 
+                            Padding="15,10" FontSize="15" />
+                    <Button Content="{Binding RecordButtonText}" Command="{Binding RecordCommand}" 
+                            Style="{StaticResource ModernButton}" 
+                            Background="#FFE91E63"
+                            Margin="8,0,0,0" 
+                            Padding="15,10" FontSize="15" />
                 </StackPanel>
                 
                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
