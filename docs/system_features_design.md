@@ -1,8 +1,8 @@
 # Group 3: System Features & Technical Design
 > **Group ID**: `feature_design`  
 > **File Path**: `docs/system_features_design.md`  
-> **Last Updated**: `2026-09-06 11:57:30`  
-> **Current Version**: `v1.6.0`  
+> **Last Updated**: `2026-09-06 12:00:30`  
+> **Current Version**: `v1.7.0`  
 
 ## Revision History
 | Version | Timestamp | Description |
@@ -14,6 +14,7 @@
 | `v1.4.0` | 2026-09-06 11:50:00 | Hợp nhất tất cả thiết kế tính năng vào tài liệu nhóm duy nhất `system_features_design.md` |
 | `v1.5.0` | 2026-09-06 11:55:00 | Thêm cấu hình GitHub Actions Workflows |
 | `v1.6.0` | 2026-09-06 11:57:30 | Gỡ bỏ `playwright-test.yml` (dự án WPF Desktop), giữ lại `cli.yml` và `deploy.yml` |
+| `v1.7.0` | 2026-09-06 12:00:30 | Cập nhật `cli.yml` kích hoạt CI build/test tự động cho nhánh `Dev` |
 
 ---
 
@@ -59,5 +60,5 @@ Tất cả 4 phím tắt được lưu/nạp tự động qua file `config.ini` 
 
 ### Description
 Hệ thống tự động hóa CI/CD tối ưu cho ứng dụng Windows Desktop (.NET 8 WPF) trong thư mục `.github/workflows/`:
-1. **`.github/workflows/cli.yml`**: Tự động restore, build Solution `AutoKeypressGame.sln` và chạy toàn bộ unit/auto test suite trên môi trường `windows-latest` mỗi khi push/PR tới `main`/`master`.
+1. **`.github/workflows/cli.yml`**: Tự động restore, build Solution `AutoKeypressGame.sln` và chạy toàn bộ unit/auto test suite trên môi trường `windows-latest` mỗi khi push/PR tới các nhánh `main`, `master`, `Dev`, `dev`.
 2. **`.github/workflows/deploy.yml`**: Tự động đóng gói bản build Win-x64 SingleFile executable và phát hành GitHub Release khi đẩy Git Tag dạng `v*` hoặc thực thi thủ công.

@@ -1,8 +1,8 @@
 # Group 1: Task Tracker & Progress Log
 > **Group ID**: `progress_tracker`  
 > **File Path**: `docs/plans/task.md`  
-> **Last Updated**: `2026-09-06 11:59:30`  
-> **Current Version**: `v1.9.0`  
+> **Last Updated**: `2026-09-06 12:00:30`  
+> **Current Version**: `v1.10.0`  
 
 ## Revision History
 | Version | Timestamp | Description |
@@ -17,6 +17,7 @@
 | `v1.7.0` | 2026-09-06 11:55:00 | Tạo `.github/workflows/` (`cli.yml`, `playwright-test.yml`, `deploy.yml`) |
 | `v1.8.0` | 2026-09-06 11:57:30 | Gỡ bỏ `playwright-test.yml` không cần thiết đối với ứng dụng Desktop |
 | `v1.9.0` | 2026-09-06 11:59:30 | Khởi tạo và checkout nhánh `Dev`, commit toàn bộ mã nguồn & tài liệu dự án |
+| `v1.10.0` | 2026-09-06 12:00:30 | Cập nhật `cli.yml` thêm nhánh `Dev`/`dev` vào danh sách push & pull_request triggers |
 
 ---
 
@@ -58,3 +59,4 @@
 | TASK-32 | Đồng bộ Assembly Version `1.5.0` vào `.csproj`, ViewModel & WPF UI Header | Completed | `AutoClicker.csproj`, `MainViewModel.cs`, `MainWindow.xaml`, `AutoClicker.Tests/` | Assembly Version & UI hiển thị `v1.5.0`, `dotnet test` PASS 67/67 |
 | TASK-33 | Tạo hệ thống CI/CD Workflows (`cli.yml`, `deploy.yml`) cho WPF Desktop | Completed | `.github/workflows/` | Kiểm tra sự tồn tại của `cli.yml` & `deploy.yml` |
 | TASK-34 | Khởi tạo nhánh `Dev` & commit toàn bộ thay đổi dự án | Completed | Git Branch `Dev` | Nhánh `Dev` đã được khởi tạo và commit 100% mã nguồn & tài liệu |
+| TASK-35 | Cập nhật `cli.yml` hỗ trợ kích hoạt CI/CD khi push/PR lên nhánh `Dev` | Completed | `.github/workflows/cli.yml` | `cli.yml` đã được cập nhật trigger nhánh `Dev` & `dev` |

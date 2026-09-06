@@ -2,9 +2,9 @@ name: .NET CLI Build & Test
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: [ "main", "master", "Dev", "dev" ]
   pull_request:
-    branches: [ "main", "master" ]
+    branches: [ "main", "master", "Dev", "dev" ]
   workflow_dispatch:
 
 jobs:
