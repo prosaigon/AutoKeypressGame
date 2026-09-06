@@ -1,8 +1,8 @@
 # Group 3: System Features & Technical Design
 > **Group ID**: `feature_design`  
 > **File Path**: `docs/system_features_design.md`  
-> **Last Updated**: `2026-09-06 12:01:30`  
-> **Current Version**: `v1.8.0`  
+> **Last Updated**: `2026-09-06 12:09:00`  
+> **Current Version**: `v1.9.0`  
 
 ## Revision History
 | Version | Timestamp | Description |
@@ -16,6 +16,7 @@
 | `v1.6.0` | 2026-09-06 11:57:30 | Gỡ bỏ `playwright-test.yml` (dự án WPF Desktop), giữ lại `cli.yml` và `deploy.yml` |
 | `v1.7.0` | 2026-09-06 12:00:30 | Cập nhật `cli.yml` kích hoạt CI build/test tự động cho nhánh `Dev` |
 | `v1.8.0` | 2026-09-06 12:01:30 | Thiết lập quy trình Merge PR từ `Dev` sang `main`/`master` (Cần Review Approval & CI Status Check) |
+| `v1.9.0` | 2026-09-06 12:09:00 | Xây dựng tài liệu `README.md` giới thiệu sản phẩm chuyên sâu & kiến trúc khoa học |
 
 ---
 
@@ -73,3 +74,10 @@ Quy định chặt chẽ luồng tích hợp mã nguồn khi nhánh `Dev` đã h
 1. **Bắt buộc tạo Pull Request (PR)**: Không cho phép push trực tiếp vào `main`/`master`. Mọi thay đổi phải tạo PR từ `Dev` sang `main`/`master`.
 2. **Bắt buộc Pass CI Checks**: Luồng `.github/workflows/cli.yml` phải chạy thành công 100% (PASS 67 unit tests & Build 0 errors).
 3. **Bắt buộc được Admin / Maintainer phê duyệt (Review Approval)**: Cần ít nhất 1 xác nhận đồng ý (Approve) từ Quản trị viên/Chủ dự án (theo cấu hình `.github/CODEOWNERS`) mới cho phép ấn nút **Merge Pull Request**.
+
+---
+
+## 7. Feature 7: Product Documentation (`README.md`)
+
+### Description
+Xây dựng tài liệu tổng quan giới thiệu sản phẩm chuyên nghiệp, thể hiện rõ thế mạnh kỹ thuật (Win32 `SendInput` Kernel Simulation, Low-Level Hooks Input Recorder, Full Numpad Support, Interactive Focus UI, 100% Automated Test Suite, CI/CD Pipeline), hướng dẫn build/run và sơ đồ kiến trúc hệ thống bằng Mermaid Diagram.
