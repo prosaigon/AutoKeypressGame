@@ -1,8 +1,8 @@
 # Group 3: System Features & Technical Design
 > **Group ID**: `feature_design`  
 > **File Path**: `docs/system_features_design.md`  
-> **Last Updated**: `2026-09-06 12:00:30`  
-> **Current Version**: `v1.7.0`  
+> **Last Updated**: `2026-09-06 12:01:30`  
+> **Current Version**: `v1.8.0`  
 
 ## Revision History
 | Version | Timestamp | Description |
@@ -15,6 +15,7 @@
 | `v1.5.0` | 2026-09-06 11:55:00 | Thêm cấu hình GitHub Actions Workflows |
 | `v1.6.0` | 2026-09-06 11:57:30 | Gỡ bỏ `playwright-test.yml` (dự án WPF Desktop), giữ lại `cli.yml` và `deploy.yml` |
 | `v1.7.0` | 2026-09-06 12:00:30 | Cập nhật `cli.yml` kích hoạt CI build/test tự động cho nhánh `Dev` |
+| `v1.8.0` | 2026-09-06 12:01:30 | Thiết lập quy trình Merge PR từ `Dev` sang `main`/`master` (Cần Review Approval & CI Status Check) |
 
 ---
 
@@ -62,3 +63,13 @@ Tất cả 4 phím tắt được lưu/nạp tự động qua file `config.ini` 
 Hệ thống tự động hóa CI/CD tối ưu cho ứng dụng Windows Desktop (.NET 8 WPF) trong thư mục `.github/workflows/`:
 1. **`.github/workflows/cli.yml`**: Tự động restore, build Solution `AutoKeypressGame.sln` và chạy toàn bộ unit/auto test suite trên môi trường `windows-latest` mỗi khi push/PR tới các nhánh `main`, `master`, `Dev`, `dev`.
 2. **`.github/workflows/deploy.yml`**: Tự động đóng gói bản build Win-x64 SingleFile executable và phát hành GitHub Release khi đẩy Git Tag dạng `v*` hoặc thực thi thủ công.
+
+---
+
+## 6. Feature 6: Pull Request & Branch Protection Merge Policy
+
+### Description
+Quy định chặt chẽ luồng tích hợp mã nguồn khi nhánh `Dev` đã hoàn thiện và chuẩn bị merge vào `main` / `master`:
+1. **Bắt buộc tạo Pull Request (PR)**: Không cho phép push trực tiếp vào `main`/`master`. Mọi thay đổi phải tạo PR từ `Dev` sang `main`/`master`.
+2. **Bắt buộc Pass CI Checks**: Luồng `.github/workflows/cli.yml` phải chạy thành công 100% (PASS 67 unit tests & Build 0 errors).
+3. **Bắt buộc được Admin / Maintainer phê duyệt (Review Approval)**: Cần ít nhất 1 xác nhận đồng ý (Approve) từ Quản trị viên/Chủ dự án (theo cấu hình `.github/CODEOWNERS`) mới cho phép ấn nút **Merge Pull Request**.
