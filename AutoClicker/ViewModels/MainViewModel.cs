@@ -31,6 +31,11 @@ namespace AutoClicker.ViewModels
         private string _startStopHotkey;
         private bool _playSound;
         private bool _isCustomLoopVisible;
+        private bool _isRecording;
+        private string _recordHotkey;
+        private string _pauseResumeHotkey;
+        private string _clearActionsHotkey;
+        private bool _isPaused;
 
         public MainViewModel()
         {
@@ -47,8 +52,13 @@ namespace AutoClicker.ViewModels
             _loopIterations = 1;
             _defaultDelay = 100;
             _startStopHotkey = "F6";
+            _recordHotkey = "F7";
+            _pauseResumeHotkey = "F8";
+            _clearActionsHotkey = "F9";
             _playSound = false;
             _isCustomLoopVisible = false;
+            _isRecording = false;
+            _isPaused = false;
 
             LoadConfig();
 
@@ -58,11 +68,26 @@ namespace AutoClicker.ViewModels
             GetCursorPositionCommand = new RelayCommand(GetCursorPosition);
             StartCommand = new RelayCommand(StartAutomation);
             StopCommand = new RelayCommand(StopAutomation);
+            PauseCommand = new RelayCommand(TogglePause);
+            ClearActionsCommand = new RelayCommand(ClearActions);
+            RecordCommand = new RelayCommand(ToggleRecording);
             SaveConfigCommand = new RelayCommand(SaveConfig);
             LoadConfigCommand = new RelayCommand(LoadConfig);
+            ResetStartStopHotkeyCommand = new RelayCommand(() => StartStopHotkey = "F6");
+            ResetRecordHotkeyCommand = new RelayCommand(() => RecordHotkey = "F7");
+            ResetPauseResumeHotkeyCommand = new RelayCommand(() => PauseResumeHotkey = "F8");
+            ResetClearActionsHotkeyCommand = new RelayCommand(() => ClearActionsHotkey = "F9");
+            ResetAllHotkeysCommand = new RelayCommand(ResetAllHotkeys);
 
-            // Start hotkey listener
-            Task.Run(() => HotKeyListener());
+            InputRecorderService.ActionRecorded += OnActionRecorded;
+        }
+
+        public void ResetAllHotkeys()
+        {
+            StartStopHotkey = "F6";
+            RecordHotkey = "F7";
+            PauseResumeHotkey = "F8";
+            ClearActionsHotkey = "F9";
         }
 
         #region Properties
@@ -95,6 +120,12 @@ namespace AutoClicker.ViewModels
         {
             get => _progressValue;
             set { _progressValue = value; OnPropertyChanged(); }
+        }
+
+        public bool IsRunning
+        {
+            get => _isRunning;
+            private set { _isRunning = value; OnPropertyChanged(); }
         }
 
         public bool CanStart
@@ -146,6 +177,58 @@ namespace AutoClicker.ViewModels
             set { _playSound = value; OnPropertyChanged(); }
         }
 
+        public bool IsRecording
+        {
+            get => _isRecording;
+            set
+            {
+                _isRecording = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(RecordButtonText));
+            }
+        }
+
+        public string RecordHotkey
+        {
+            get => _recordHotkey;
+            set { _recordHotkey = value; OnPropertyChanged(); }
+        }
+
+        public string PauseResumeHotkey
+        {
+            get => _pauseResumeHotkey;
+            set { _pauseResumeHotkey = value; OnPropertyChanged(); }
+        }
+
+        public string ClearActionsHotkey
+        {
+            get => _clearActionsHotkey;
+            set { _clearActionsHotkey = value; OnPropertyChanged(); }
+        }
+
+        public bool IsPaused
+        {
+            get => _isPaused;
+            set
+            {
+                _isPaused = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(PauseButtonText));
+            }
+        }
+
+        public string RecordButtonText => IsRecording ? "⏹️ Stop Rec" : "🔴 Record";
+        public string PauseButtonText => IsPaused ? "▶️ Resume" : "⏸️ Pause";
+
+        public string AppVersion
+        {
+            get
+            {
+                var ver = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+                return ver != null ? $"v{ver.Major}.{ver.Minor}.{ver.Build}" : "v1.5.0";
+            }
+        }
+
         public bool IsCustomLoopVisible
         {
             get => _isCustomLoopVisible;
@@ -162,8 +245,16 @@ namespace AutoClicker.ViewModels
         public ICommand GetCursorPositionCommand { get; }
         public ICommand StartCommand { get; }
         public ICommand StopCommand { get; }
+        public ICommand PauseCommand { get; }
+        public ICommand ClearActionsCommand { get; }
+        public ICommand RecordCommand { get; }
         public ICommand SaveConfigCommand { get; }
         public ICommand LoadConfigCommand { get; }
+        public ICommand ResetStartStopHotkeyCommand { get; }
+        public ICommand ResetRecordHotkeyCommand { get; }
+        public ICommand ResetPauseResumeHotkeyCommand { get; }
+        public ICommand ResetClearActionsHotkeyCommand { get; }
+        public ICommand ResetAllHotkeysCommand { get; }
 
         #endregion
 
@@ -217,7 +308,7 @@ namespace AutoClicker.ViewModels
                 return;
             }
 
-            _isRunning = true;
+            IsRunning = true;
             CanStart = false;
             CanStop = true;
             StatusText = "Running...";
@@ -234,7 +325,7 @@ namespace AutoClicker.ViewModels
             }
             finally
             {
-                _isRunning = false;
+                IsRunning = false;
                 CanStart = true;
                 CanStop = false;
                 
@@ -278,6 +369,14 @@ namespace AutoClicker.ViewModels
             {
                 for (int i = 0; i < Actions.Count; i++)
                 {
+                    if (cancellationToken.IsCancellationRequested)
+                        break;
+
+                    while (IsPaused && !cancellationToken.IsCancellationRequested)
+                    {
+                        await Task.Delay(100, cancellationToken);
+                    }
+
                     if (cancellationToken.IsCancellationRequested)
                         break;
 
@@ -332,30 +431,89 @@ namespace AutoClicker.ViewModels
             }
         }
 
-        private async void HotKeyListener()
+        public void ToggleAutomation()
         {
-            while (true)
+            if (Application.Current != null && Application.Current.Dispatcher != null)
             {
-                await Task.Delay(50);
-
-                ushort hotkeyCode = InputSimulatorService.GetVirtualKeyCode(_startStopHotkey);
-                
-                if (InputSimulatorService.IsKeyDown(hotkeyCode))
+                Application.Current.Dispatcher.Invoke(() =>
                 {
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        if (CanStart)
-                            StartAutomation();
-                        else if (CanStop)
-                            StopAutomation();
-                    });
+                    if (CanStart)
+                        StartAutomation();
+                    else if (CanStop)
+                        StopAutomation();
+                });
+            }
+            else
+            {
+                if (CanStart)
+                    StartAutomation();
+                else if (CanStop)
+                    StopAutomation();
+            }
+        }
 
-                    // Wait for key release
-                    while (InputSimulatorService.IsKeyDown(hotkeyCode))
-                    {
-                        await Task.Delay(50);
-                    }
-                }
+        public void TogglePause()
+        {
+            if (!IsRunning) return;
+
+            IsPaused = !IsPaused;
+            StatusText = IsPaused ? "Paused..." : "Running...";
+        }
+
+        public void ClearActions()
+        {
+            if (IsRunning || IsRecording) return;
+
+            Actions.Clear();
+            StatusText = "Actions cleared.";
+        }
+
+        public void ToggleRecording()
+        {
+            if (IsRecording)
+            {
+                InputRecorderService.StopRecording();
+                IsRecording = false;
+                CanStart = true;
+                CanStop = false;
+                StatusText = $"Recording stopped. {Actions.Count} actions captured.";
+            }
+            else
+            {
+                if (IsRunning)
+                    StopAutomation();
+
+                Actions.Clear();
+                InputRecorderService.StartRecording();
+                IsRecording = true;
+                CanStart = false;
+                CanStop = false;
+                StatusText = "Recording... Press F7 or Record button to Stop";
+            }
+        }
+
+        private void OnActionRecorded(ActionItem action)
+        {
+            if (action == null) return;
+
+            // Filter out the recording toggle hotkey (F7)
+            if (action.ActionType == ActionType.Keyboard && string.Equals(action.KeyOrButton, RecordHotkey, StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            if (Application.Current != null && Application.Current.Dispatcher != null)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    Actions.Add(action);
+                    StatusText = $"Recorded: {action.DisplayValue}";
+                });
+            }
+            else
+            {
+                Actions.Add(action);
+                StatusText = $"Recorded: {action.DisplayValue}";
             }
         }
 
@@ -374,7 +532,10 @@ namespace AutoClicker.ViewModels
                 _iniFile.Write("Settings", "LoopMode", SelectedLoopMode);
                 _iniFile.Write("Settings", "LoopIterations", LoopIterations);
                 _iniFile.Write("Settings", "DefaultDelay", DefaultDelay);
-                _iniFile.Write("Settings", "Hotkey", StartStopHotkey);
+                _iniFile.Write("Settings", "StartStopHotkey", StartStopHotkey);
+                _iniFile.Write("Settings", "RecordHotkey", RecordHotkey);
+                _iniFile.Write("Settings", "PauseResumeHotkey", PauseResumeHotkey);
+                _iniFile.Write("Settings", "ClearActionsHotkey", ClearActionsHotkey);
                 _iniFile.Write("Settings", "PlaySound", PlaySound);
 
                 // Save actions
@@ -414,7 +575,10 @@ namespace AutoClicker.ViewModels
                 SelectedLoopMode = _iniFile.Read("Settings", "LoopMode", "No Loop");
                 LoopIterations = _iniFile.ReadInt("Settings", "LoopIterations", 1);
                 DefaultDelay = _iniFile.ReadInt("Settings", "DefaultDelay", 100);
-                StartStopHotkey = _iniFile.Read("Settings", "Hotkey", "F6");
+                StartStopHotkey = _iniFile.Read("Settings", "StartStopHotkey", _iniFile.Read("Settings", "Hotkey", "F6"));
+                RecordHotkey = _iniFile.Read("Settings", "RecordHotkey", "F7");
+                PauseResumeHotkey = _iniFile.Read("Settings", "PauseResumeHotkey", "F8");
+                ClearActionsHotkey = _iniFile.Read("Settings", "ClearActionsHotkey", "F9");
                 PlaySound = _iniFile.ReadBool("Settings", "PlaySound", false);
 
                 // Load actions
@@ -425,11 +589,23 @@ namespace AutoClicker.ViewModels
                 {
                     string prefix = $"Action{i}";
                     
+                    string actionTypeStr = _iniFile.Read("Actions", $"{prefix}_Type", "Keyboard");
+                    if (!Enum.TryParse<ActionType>(actionTypeStr, true, out var actionType))
+                    {
+                        actionType = ActionType.Keyboard;
+                    }
+
+                    string mouseBtnStr = _iniFile.Read("Actions", $"{prefix}_MouseButton", "Left");
+                    if (!Enum.TryParse<MouseButtonType>(mouseBtnStr, true, out var mouseButton))
+                    {
+                        mouseButton = MouseButtonType.Left;
+                    }
+
                     var action = new ActionItem
                     {
-                        ActionType = Enum.Parse<ActionType>(_iniFile.Read("Actions", $"{prefix}_Type", "Keyboard")),
+                        ActionType = actionType,
                         KeyOrButton = _iniFile.Read("Actions", $"{prefix}_KeyOrButton", "A"),
-                        MouseButton = Enum.Parse<MouseButtonType>(_iniFile.Read("Actions", $"{prefix}_MouseButton", "Left")),
+                        MouseButton = mouseButton,
                         X = _iniFile.ReadInt("Actions", $"{prefix}_X", 0),
                         Y = _iniFile.ReadInt("Actions", $"{prefix}_Y", 0),
                         Delay = _iniFile.ReadInt("Actions", $"{prefix}_Delay", 100)
