@@ -1,8 +1,8 @@
 # Group 3: System Features & Technical Design
 > **Group ID**: `feature_design`  
 > **File Path**: `docs/system_features_design.md`  
-> **Last Updated**: `2026-09-06 12:09:00`  
-> **Current Version**: `v1.9.0`  
+> **Last Updated**: `2026-09-06 13:04:30`  
+> **Current Version**: `v1.10.0`  
 
 ## Revision History
 | Version | Timestamp | Description |
@@ -17,6 +17,7 @@
 | `v1.7.0` | 2026-09-06 12:00:30 | Cập nhật `cli.yml` kích hoạt CI build/test tự động cho nhánh `Dev` |
 | `v1.8.0` | 2026-09-06 12:01:30 | Thiết lập quy trình Merge PR từ `Dev` sang `main`/`master` (Cần Review Approval & CI Status Check) |
 | `v1.9.0` | 2026-09-06 12:09:00 | Xây dựng tài liệu `README.md` giới thiệu sản phẩm chuyên sâu & kiến trúc khoa học |
+| `v1.10.0` | 2026-09-06 13:04:30 | Cài đặt Skill ECC (Everything Code) cho Antigravity tại `.agent/skills/ecc/SKILL.md` |
 
 ---
 
@@ -81,3 +82,10 @@ Quy định chặt chẽ luồng tích hợp mã nguồn khi nhánh `Dev` đã h
 
 ### Description
 Xây dựng tài liệu tổng quan giới thiệu sản phẩm chuyên nghiệp, thể hiện rõ thế mạnh kỹ thuật (Win32 `SendInput` Kernel Simulation, Low-Level Hooks Input Recorder, Full Numpad Support, Interactive Focus UI, 100% Automated Test Suite, CI/CD Pipeline), hướng dẫn build/run và sơ đồ kiến trúc hệ thống bằng Mermaid Diagram.
+
+---
+
+## 8. Feature 8: ECC (Everything Code) Skill Integration
+
+### Description
+Tích hợp Skill **ECC (Everything Code)** cho Antigravity tại đường dẫn `.agent/skills/ecc/SKILL.md`. Định nghĩa chuẩn hóa các quy trình phát triển agentic: Single-flow Execution, Deep Code Analysis, Test-Driven Verification, Grouped Documentation & Versioning, Git Dev Branch & GitHub Issue Workflow.
