@@ -1,8 +1,8 @@
 # Group 2: Architecture, Code Evaluation & Compliance Audit
 > **Group ID**: `code_architecture`  
 > **File Path**: `docs/architecture_and_code_review.md`  
-> **Last Updated**: `2026-09-06 11:53:30`  
-> **Current Version**: `v1.3.0`  
+> **Last Updated**: `2026-09-06 12:05:00`  
+> **Current Version**: `v1.4.0`  
 
 ## Revision History
 | Version | Timestamp | Description |
@@ -11,6 +11,7 @@
 | `v1.1.0` | 2026-09-06 04:15:00 | Thực hiện audit tuân thủ quy tắc workspace `rules_compliance_audit.md` |
 | `v1.2.0` | 2026-09-06 11:50:00 | Hợp nhất vào tài liệu nhóm duy nhất `architecture_and_code_review.md` theo quy tắc mới |
 | `v1.3.0` | 2026-09-06 11:53:30 | Đưa quy tắc cập nhật đồng bộ Assembly Version vào GEMINI.md & AGENTS.md |
+| `v1.4.0` | 2026-09-06 12:05:00 | Cập nhật quy tắc Push Dev, PR Approval Master, dùng MCP/Git, và quản lý GitHub Issue |
 
 ---
 
@@ -37,6 +38,10 @@ Dự án **AutoKeypressGame** (`AutoClicker`) là ứng dụng WPF (.NET 8.0 Win
 
 ### Audit Summary
 - **Workspace Documentation Rule**: 100% tài liệu được duy trì trong `docs/` phân theo nhóm file duy nhất với timestamp `YYYY-MM-DD HH:mm:ss` và `Version`.
-- **Assembly Version Sync Rule**: Mỗi khi nâng version tài liệu/dự án, phiên bản Assembly trong `.csproj` và hiển thị trên giao diện ứng dụng phải được cập nhật đồng bộ tương ứng.
+- **Dev Branch & Push Rule**: 100% commit và thay đổi mã nguồn được thực hiện và push trên nhánh `Dev` trước.
+- **Master Approval & Merge Rule**: Yêu cầu Pull Request và sự đồng ý phê duyệt (Approve) từ master (maintainer) trước khi merge vào `main`/`master`.
+- **MCP & Git Tool Rule**: Ưu tiên sử dụng MCP tools (`github` server) và Git CLI cho thao tác repository.
+- **GitHub Issue Workflow Rule**: Tạo GitHub Issue trước cho mọi yêu cầu mới/chỉnh sửa, cập nhật tiến độ và đóng Issue khi hoàn thành.
+- **Assembly Version Sync Rule**: Đồng bộ phiên bản Assembly trong `.csproj` và giao diện ứng dụng khi đổi version.
 - **Automated Testing Rule**: 100% thay đổi mã nguồn có unit test tương ứng (`67/67 Passed`).
 - **Build Quality**: Solution biên dịch thành công **0 Warnings, 0 Errors**.

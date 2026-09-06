@@ -1,8 +1,8 @@
 # Group 1: Task Tracker & Progress Log
 > **Group ID**: `progress_tracker`  
 > **File Path**: `docs/plans/task.md`  
-> **Last Updated**: `2026-09-06 12:01:30`  
-> **Current Version**: `v1.11.0`  
+> **Last Updated**: `2026-09-06 12:05:00`  
+> **Current Version**: `v1.12.0`  
 
 ## Revision History
 | Version | Timestamp | Description |
@@ -19,6 +19,7 @@
 | `v1.9.0` | 2026-09-06 11:59:30 | Khởi tạo và checkout nhánh `Dev`, commit toàn bộ mã nguồn & tài liệu dự án |
 | `v1.10.0` | 2026-09-06 12:00:30 | Cập nhật `cli.yml` thêm nhánh `Dev`/`dev` vào danh sách push & pull_request triggers |
 | `v1.11.0` | 2026-09-06 12:01:30 | Thiết lập quy định Merge PR từ `Dev` sang `main`/`master` (Cần `.github/CODEOWNERS` & Review Approval) |
+| `v1.12.0` | 2026-09-06 12:05:00 | Đưa bổ sung quy tắc mới (Push Dev, Master Approve, dùng MCP/Git, GitHub Issues Workflow) vào GEMINI.md & AGENTS.md |
 
 ---
 
@@ -62,3 +63,4 @@
 | TASK-34 | Khởi tạo nhánh `Dev` & commit toàn bộ thay đổi dự án | Completed | Git Branch `Dev` | Nhánh `Dev` đã được khởi tạo và commit 100% mã nguồn & tài liệu |
 | TASK-35 | Cập nhật `cli.yml` hỗ trợ kích hoạt CI/CD khi push/PR lên nhánh `Dev` | Completed | `.github/workflows/cli.yml` | `cli.yml` đã được cập nhật trigger nhánh `Dev` & `dev` |
 | TASK-36 | Tạo `.github/CODEOWNERS` & Quy định Phê duyệt Review khi Merge PR từ `Dev` sang `main`/`master` | Completed | `.github/CODEOWNERS`, `docs/system_features_design.md` | Đã thiết lập file CODEOWNERS và quy định phê duyệt PR Merge |
+| TASK-37 | Bổ sung 4 quy tắc workspace mới (Push Dev, Master Approve Merge, MCP/Git, GitHub Issues) | Completed | `GEMINI.md`, `.agent/AGENTS.md`, `docs/` | Đã cập nhật quy tắc trong GEMINI.md, AGENTS.md và docs |
