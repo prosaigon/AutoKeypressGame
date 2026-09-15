@@ -1,6 +1,9 @@
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Drawing;
+using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,11 +16,15 @@ namespace AutoClicker.ViewModels
 {
     public class MainViewModel : INotifyPropertyChanged
     {
-        private readonly IniFileService _iniFile;
-        private readonly string _configPath;
+        private readonly ProfileService _profileService;
+        private IniFileService _iniFile;
         
         private ObservableCollection<ActionItem> _actions;
         private ActionItem _selectedAction;
+        private ObservableCollection<ProfileModel> _profiles;
+        private ProfileModel _selectedProfile;
+        private string _newProfileName;
+
         private bool _isRunning;
         private CancellationTokenSource _cancellationTokenSource;
         private string _statusText;
@@ -39,8 +46,8 @@ namespace AutoClicker.ViewModels
 
         public MainViewModel()
         {
-            _configPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.ini");
-            _iniFile = new IniFileService(_configPath);
+            _profileService = new ProfileService();
+            _profiles = new ObservableCollection<ProfileModel>();
             
             _actions = new ObservableCollection<ActionItem>();
             _statusText = "Ready";
@@ -60,19 +67,31 @@ namespace AutoClicker.ViewModels
             _isRecording = false;
             _isPaused = false;
 
-            LoadConfig();
+            RefreshProfiles();
 
             AddKeyboardActionCommand = new RelayCommand(AddKeyboardAction);
             AddClickActionCommand = new RelayCommand(AddClickAction);
+            AddWaitForPixelActionCommand = new RelayCommand(AddWaitForPixelAction);
+            AddPixelWatchActionCommand = new RelayCommand(AddPixelWatchAction);
+            PickScreenColorCommand = new RelayCommand(PickScreenColor);
             DeleteActionCommand = new RelayCommand<ActionItem>(DeleteAction);
             GetCursorPositionCommand = new RelayCommand(GetCursorPosition);
+
+            MoveUpCommand = new RelayCommand(MoveActionUp, () => SelectedAction != null && Actions.IndexOf(SelectedAction) > 0);
+            MoveDownCommand = new RelayCommand(MoveActionDown, () => SelectedAction != null && Actions.IndexOf(SelectedAction) < Actions.Count - 1);
+            DuplicateActionCommand = new RelayCommand(DuplicateAction, () => SelectedAction != null);
+
             StartCommand = new RelayCommand(StartAutomation);
             StopCommand = new RelayCommand(StopAutomation);
             PauseCommand = new RelayCommand(TogglePause);
             ClearActionsCommand = new RelayCommand(ClearActions);
             RecordCommand = new RelayCommand(ToggleRecording);
+
             SaveConfigCommand = new RelayCommand(SaveConfig);
             LoadConfigCommand = new RelayCommand(LoadConfig);
+            CreateProfileCommand = new RelayCommand(CreateProfile);
+            DeleteProfileCommand = new RelayCommand(DeleteProfile);
+
             ResetStartStopHotkeyCommand = new RelayCommand(() => StartStopHotkey = "F6");
             ResetRecordHotkeyCommand = new RelayCommand(() => RecordHotkey = "F7");
             ResetPauseResumeHotkeyCommand = new RelayCommand(() => PauseResumeHotkey = "F8");
@@ -220,12 +239,39 @@ namespace AutoClicker.ViewModels
         public string RecordButtonText => IsRecording ? "⏹️ Stop Rec" : "🔴 Record";
         public string PauseButtonText => IsPaused ? "▶️ Resume" : "⏸️ Pause";
 
+        public ObservableCollection<ProfileModel> Profiles
+        {
+            get => _profiles;
+            set { _profiles = value; OnPropertyChanged(); }
+        }
+
+        public ProfileModel SelectedProfile
+        {
+            get => _selectedProfile;
+            set
+            {
+                if (_selectedProfile != value && value != null)
+                {
+                    _selectedProfile = value;
+                    _profileService.ActiveProfileName = value.Name;
+                    OnPropertyChanged();
+                    LoadConfig();
+                }
+            }
+        }
+
+        public string NewProfileName
+        {
+            get => _newProfileName;
+            set { _newProfileName = value; OnPropertyChanged(); }
+        }
+
         public string AppVersion
         {
             get
             {
                 var ver = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-                return ver != null ? $"v{ver.Major}.{ver.Minor}.{ver.Build}" : "v1.5.0";
+                return ver != null ? $"v{ver.Major}.{ver.Minor}.{ver.Build}" : "v2.0.0";
             }
         }
 
@@ -241,8 +287,16 @@ namespace AutoClicker.ViewModels
 
         public ICommand AddKeyboardActionCommand { get; }
         public ICommand AddClickActionCommand { get; }
+        public ICommand AddWaitForPixelActionCommand { get; }
+        public ICommand AddPixelWatchActionCommand { get; }
+        public ICommand PickScreenColorCommand { get; }
         public ICommand DeleteActionCommand { get; }
         public ICommand GetCursorPositionCommand { get; }
+
+        public ICommand MoveUpCommand { get; }
+        public ICommand MoveDownCommand { get; }
+        public ICommand DuplicateActionCommand { get; }
+
         public ICommand StartCommand { get; }
         public ICommand StopCommand { get; }
         public ICommand PauseCommand { get; }
@@ -250,11 +304,73 @@ namespace AutoClicker.ViewModels
         public ICommand RecordCommand { get; }
         public ICommand SaveConfigCommand { get; }
         public ICommand LoadConfigCommand { get; }
+        public ICommand CreateProfileCommand { get; }
+        public ICommand DeleteProfileCommand { get; }
+
         public ICommand ResetStartStopHotkeyCommand { get; }
         public ICommand ResetRecordHotkeyCommand { get; }
         public ICommand ResetPauseResumeHotkeyCommand { get; }
         public ICommand ResetClearActionsHotkeyCommand { get; }
         public ICommand ResetAllHotkeysCommand { get; }
+
+        #endregion
+
+        #region Profile Management
+
+        public void RefreshProfiles()
+        {
+            var list = _profileService.ListProfiles();
+            Profiles.Clear();
+            foreach (var p in list)
+            {
+                Profiles.Add(p);
+            }
+
+            var current = Profiles.FirstOrDefault(p => string.Equals(p.Name, _profileService.ActiveProfileName, StringComparison.OrdinalIgnoreCase));
+            _selectedProfile = current ?? Profiles.FirstOrDefault();
+            OnPropertyChanged(nameof(SelectedProfile));
+
+            LoadConfig();
+        }
+
+        public void CreateProfile()
+        {
+            if (string.IsNullOrWhiteSpace(NewProfileName))
+            {
+                MessageBox.Show("Please enter a profile name.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            string name = NewProfileName.Trim();
+            if (_profileService.CreateProfile(name))
+            {
+                _profileService.ActiveProfileName = name;
+                NewProfileName = string.Empty;
+                RefreshProfiles();
+                SaveConfig();
+            }
+            else
+            {
+                MessageBox.Show("A profile with this name already exists or name is invalid.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        public void DeleteProfile()
+        {
+            if (SelectedProfile == null || string.Equals(SelectedProfile.Name, ProfileService.DefaultProfileName, StringComparison.OrdinalIgnoreCase))
+            {
+                MessageBox.Show("Cannot delete the Default profile.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            string nameToDelete = SelectedProfile.Name;
+            var result = MessageBox.Show($"Are you sure you want to delete profile '{nameToDelete}'?", "Confirm Delete", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result == MessageBoxResult.Yes)
+            {
+                _profileService.DeleteProfile(nameToDelete);
+                RefreshProfiles();
+            }
+        }
 
         #endregion
 
@@ -269,6 +385,7 @@ namespace AutoClicker.ViewModels
                 Delay = _defaultDelay
             };
             Actions.Add(action);
+            SelectedAction = action;
         }
 
         private void AddClickAction()
@@ -284,6 +401,66 @@ namespace AutoClicker.ViewModels
                 Delay = _defaultDelay
             };
             Actions.Add(action);
+            SelectedAction = action;
+        }
+
+        private void AddWaitForPixelAction()
+        {
+            InputSimulatorService.GetCursorPosition(out int x, out int y);
+            var color = ScreenCaptureService.GetPixelColor(x, y);
+            string hexColor = ScreenCaptureService.ColorToHex(color);
+
+            var action = new ActionItem
+            {
+                ActionType = ActionType.WaitForPixelColor,
+                X = x,
+                Y = y,
+                TargetColor = hexColor,
+                ColorTolerance = 10,
+                TimeoutMs = 5000,
+                Delay = _defaultDelay
+            };
+            Actions.Add(action);
+            SelectedAction = action;
+            StatusText = $"Added Pixel Wait at ({x}, {y}) for {hexColor}";
+        }
+
+        private void AddPixelWatchAction()
+        {
+            InputSimulatorService.GetCursorPosition(out int x, out int y);
+            var color = ScreenCaptureService.GetPixelColor(x, y);
+            string hexColor = ScreenCaptureService.ColorToHex(color);
+
+            var action = new ActionItem
+            {
+                ActionType = ActionType.ConditionalPixelColor,
+                X = x,
+                Y = y,
+                TargetColor = hexColor,
+                ColorTolerance = 10,
+                KeyOrButton = "SPACE",
+                Delay = _defaultDelay
+            };
+            Actions.Add(action);
+            SelectedAction = action;
+            StatusText = $"Added Vision Watch at ({x}, {y}) for {hexColor} -> Press SPACE";
+        }
+
+        private void PickScreenColor()
+        {
+            InputSimulatorService.GetCursorPosition(out int x, out int y);
+            var color = ScreenCaptureService.GetPixelColor(x, y);
+            string hex = ScreenCaptureService.ColorToHex(color);
+            StatusText = $"Color at ({x}, {y}): {hex} (RGB: {color.R}, {color.G}, {color.B})";
+
+            if (SelectedAction != null && (SelectedAction.ActionType == ActionType.WaitForPixelColor ||
+                                          SelectedAction.ActionType == ActionType.WaitForPixelChange ||
+                                          SelectedAction.ActionType == ActionType.ConditionalPixelColor))
+            {
+                SelectedAction.X = x;
+                SelectedAction.Y = y;
+                SelectedAction.TargetColor = hex;
+            }
         }
 
         private void DeleteAction(ActionItem action)
@@ -297,7 +474,53 @@ namespace AutoClicker.ViewModels
         private void GetCursorPosition()
         {
             InputSimulatorService.GetCursorPosition(out int x, out int y);
-            MessageBox.Show($"Current cursor position: ({x}, {y})", "Cursor Position", MessageBoxButton.OK, MessageBoxImage.Information);
+            var color = ScreenCaptureService.GetPixelColor(x, y);
+            string hex = ScreenCaptureService.ColorToHex(color);
+            MessageBox.Show($"Current cursor position: ({x}, {y})\nColor: {hex} (R:{color.R} G:{color.G} B:{color.B})", "Cursor Position & Color", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        public void MoveActionUp()
+        {
+            if (SelectedAction == null) return;
+            int index = Actions.IndexOf(SelectedAction);
+            if (index > 0)
+            {
+                var item = SelectedAction;
+                Actions.Move(index, index - 1);
+                SelectedAction = item;
+            }
+        }
+
+        public void MoveActionDown()
+        {
+            if (SelectedAction == null) return;
+            int index = Actions.IndexOf(SelectedAction);
+            if (index >= 0 && index < Actions.Count - 1)
+            {
+                var item = SelectedAction;
+                Actions.Move(index, index + 1);
+                SelectedAction = item;
+            }
+        }
+
+        public void DuplicateAction()
+        {
+            if (SelectedAction == null) return;
+            int index = Actions.IndexOf(SelectedAction);
+            var clone = new ActionItem
+            {
+                ActionType = SelectedAction.ActionType,
+                KeyOrButton = SelectedAction.KeyOrButton,
+                MouseButton = SelectedAction.MouseButton,
+                X = SelectedAction.X,
+                Y = SelectedAction.Y,
+                TargetColor = SelectedAction.TargetColor,
+                ColorTolerance = SelectedAction.ColorTolerance,
+                TimeoutMs = SelectedAction.TimeoutMs,
+                Delay = SelectedAction.Delay
+            };
+            Actions.Insert(index + 1, clone);
+            SelectedAction = clone;
         }
 
         private async void StartAutomation()
@@ -399,15 +622,41 @@ namespace AutoClicker.ViewModels
                     }
 
                     // Execute action
-                    if (action.ActionType == ActionType.Keyboard)
+                    switch (action.ActionType)
                     {
-                        InputSimulatorService.PressKey(action.KeyOrButton);
-                        StatusText = $"Pressed key: {action.KeyOrButton}";
-                    }
-                    else if (action.ActionType == ActionType.MouseClick)
-                    {
-                        InputSimulatorService.ClickMouse(action.X, action.Y, action.MouseButton);
-                        StatusText = $"Clicked at ({action.X}, {action.Y})";
+                        case ActionType.Keyboard:
+                            InputSimulatorService.PressKey(action.KeyOrButton);
+                            StatusText = $"Pressed key: {action.KeyOrButton}";
+                            break;
+
+                        case ActionType.MouseClick:
+                            InputSimulatorService.ClickMouse(action.X, action.Y, action.MouseButton);
+                            StatusText = $"Clicked at ({action.X}, {action.Y})";
+                            break;
+
+                        case ActionType.WaitForPixelColor:
+                            StatusText = $"Waiting for pixel ({action.X}, {action.Y}) == {action.TargetColor}...";
+                            await WaitForPixelColorConditionAsync(action, cancellationToken);
+                            break;
+
+                        case ActionType.WaitForPixelChange:
+                            StatusText = $"Waiting for pixel change at ({action.X}, {action.Y})...";
+                            await WaitForPixelChangeConditionAsync(action, cancellationToken);
+                            break;
+
+                        case ActionType.ConditionalPixelColor:
+                            var currentColor = ScreenCaptureService.GetPixelColor(action.X, action.Y);
+                            var target = ScreenCaptureService.HexToColor(action.TargetColor);
+                            if (ScreenCaptureService.ColorsMatch(currentColor, target, action.ColorTolerance))
+                            {
+                                InputSimulatorService.PressKey(action.KeyOrButton);
+                                StatusText = $"Vision Match: Pressed {action.KeyOrButton}";
+                            }
+                            else
+                            {
+                                StatusText = $"Vision: No match at ({action.X}, {action.Y})";
+                            }
+                            break;
                     }
 
                     // Wait for delay
@@ -428,6 +677,52 @@ namespace AutoClicker.ViewModels
                 {
                     await Task.Delay(100, cancellationToken);
                 }
+            }
+        }
+
+        private async Task WaitForPixelColorConditionAsync(ActionItem action, CancellationToken cancellationToken)
+        {
+            var targetColor = ScreenCaptureService.HexToColor(action.TargetColor);
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                var currentColor = ScreenCaptureService.GetPixelColor(action.X, action.Y);
+                if (ScreenCaptureService.ColorsMatch(currentColor, targetColor, action.ColorTolerance))
+                {
+                    return;
+                }
+
+                if (action.TimeoutMs > 0 && stopwatch.ElapsedMilliseconds >= action.TimeoutMs)
+                {
+                    StatusText = $"Pixel wait timed out ({action.TimeoutMs}ms)";
+                    return;
+                }
+
+                await Task.Delay(50, cancellationToken);
+            }
+        }
+
+        private async Task WaitForPixelChangeConditionAsync(ActionItem action, CancellationToken cancellationToken)
+        {
+            var initialColor = ScreenCaptureService.HexToColor(action.TargetColor);
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                var currentColor = ScreenCaptureService.GetPixelColor(action.X, action.Y);
+                if (!ScreenCaptureService.ColorsMatch(currentColor, initialColor, action.ColorTolerance))
+                {
+                    return;
+                }
+
+                if (action.TimeoutMs > 0 && stopwatch.ElapsedMilliseconds >= action.TimeoutMs)
+                {
+                    StatusText = $"Pixel change wait timed out ({action.TimeoutMs}ms)";
+                    return;
+                }
+
+                await Task.Delay(50, cancellationToken);
             }
         }
 
@@ -525,6 +820,9 @@ namespace AutoClicker.ViewModels
         {
             try
             {
+                string configPath = _profileService.GetConfigPath();
+                _iniFile = new IniFileService(configPath);
+
                 // Clear existing action data
                 _iniFile.DeleteSection("Actions");
                 
@@ -551,10 +849,13 @@ namespace AutoClicker.ViewModels
                     _iniFile.Write("Actions", $"{prefix}_X", action.X);
                     _iniFile.Write("Actions", $"{prefix}_Y", action.Y);
                     _iniFile.Write("Actions", $"{prefix}_Delay", action.Delay);
+                    _iniFile.Write("Actions", $"{prefix}_TargetColor", action.TargetColor ?? "#FFFFFF");
+                    _iniFile.Write("Actions", $"{prefix}_ColorTolerance", action.ColorTolerance);
+                    _iniFile.Write("Actions", $"{prefix}_TimeoutMs", action.TimeoutMs);
                 }
 
                 _iniFile.Save();
-                MessageBox.Show("Configuration saved successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                StatusText = $"Profile '{_profileService.ActiveProfileName}' saved.";
             }
             catch (Exception ex)
             {
@@ -566,9 +867,22 @@ namespace AutoClicker.ViewModels
         {
             try
             {
-                if (!System.IO.File.Exists(_configPath))
+                string configPath = _profileService.GetConfigPath();
+                
+                // Fallback / migrate from root config.ini if default profile config doesn't exist
+                if (!File.Exists(configPath) && string.Equals(_profileService.ActiveProfileName, ProfileService.DefaultProfileName, StringComparison.OrdinalIgnoreCase))
+                {
+                    string rootLegacyConfig = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.ini");
+                    if (File.Exists(rootLegacyConfig))
+                    {
+                        File.Copy(rootLegacyConfig, configPath, true);
+                    }
+                }
+
+                if (!File.Exists(configPath))
                     return;
 
+                _iniFile = new IniFileService(configPath);
                 _iniFile.Load();
 
                 // Load general settings
@@ -608,13 +922,16 @@ namespace AutoClicker.ViewModels
                         MouseButton = mouseButton,
                         X = _iniFile.ReadInt("Actions", $"{prefix}_X", 0),
                         Y = _iniFile.ReadInt("Actions", $"{prefix}_Y", 0),
-                        Delay = _iniFile.ReadInt("Actions", $"{prefix}_Delay", 100)
+                        Delay = _iniFile.ReadInt("Actions", $"{prefix}_Delay", 100),
+                        TargetColor = _iniFile.Read("Actions", $"{prefix}_TargetColor", "#FFFFFF"),
+                        ColorTolerance = _iniFile.ReadInt("Actions", $"{prefix}_ColorTolerance", 10),
+                        TimeoutMs = _iniFile.ReadInt("Actions", $"{prefix}_TimeoutMs", 5000)
                     };
                     
                     Actions.Add(action);
                 }
 
-                StatusText = "Configuration loaded";
+                StatusText = $"Profile '{_profileService.ActiveProfileName}' loaded.";
             }
             catch (Exception ex)
             {

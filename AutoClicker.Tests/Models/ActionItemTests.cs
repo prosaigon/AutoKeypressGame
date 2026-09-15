@@ -36,21 +36,64 @@ namespace AutoClicker.Tests.Models
         }
 
         [Fact]
+        public void DisplayValue_WaitForPixelColor_ReturnsFormattedString()
+        {
+            var item = new ActionItem
+            {
+                ActionType = ActionType.WaitForPixelColor,
+                X = 300,
+                Y = 400,
+                TargetColor = "#FF0000",
+                ColorTolerance = 15
+            };
+
+            Assert.Equal("Wait Pixel (300, 400) == #FF0000 (Tol: 15)", item.DisplayValue);
+        }
+
+        [Fact]
+        public void DisplayValue_WaitForPixelChange_ReturnsFormattedString()
+        {
+            var item = new ActionItem
+            {
+                ActionType = ActionType.WaitForPixelChange,
+                X = 500,
+                Y = 600,
+                TargetColor = "#00FF00"
+            };
+
+            Assert.Equal("Wait Pixel (500, 600) changes from #00FF00", item.DisplayValue);
+        }
+
+        [Fact]
+        public void DisplayValue_ConditionalPixelColor_ReturnsFormattedString()
+        {
+            var item = new ActionItem
+            {
+                ActionType = ActionType.ConditionalPixelColor,
+                X = 150,
+                Y = 250,
+                TargetColor = "#0000FF",
+                KeyOrButton = "SPACE"
+            };
+
+            Assert.Equal("If Pixel (150, 250) == #0000FF -> Press SPACE", item.DisplayValue);
+        }
+
+        [Fact]
         public void PropertyChanged_FiresOnKeyOrButtonChange()
         {
             var item = new ActionItem();
-            bool eventFired = false;
-            string changedPropName = null;
+            var changedProps = new System.Collections.Generic.List<string>();
 
             item.PropertyChanged += (s, e) =>
             {
-                eventFired = true;
-                changedPropName = e.PropertyName;
+                changedProps.Add(e.PropertyName);
             };
 
             item.KeyOrButton = "B";
 
-            Assert.True(eventFired);
+            Assert.Contains(nameof(ActionItem.KeyOrButton), changedProps);
+            Assert.Contains(nameof(ActionItem.DisplayValue), changedProps);
         }
     }
 }

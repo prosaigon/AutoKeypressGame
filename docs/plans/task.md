@@ -1,8 +1,8 @@
 # Group 1: Task Tracker & Progress Log
 > **Group ID**: `progress_tracker`  
 > **File Path**: `docs/plans/task.md`  
-> **Last Updated**: `2026-09-06 13:04:30`  
-> **Current Version**: `v1.14.0`  
+> **Last Updated**: `2026-09-15 22:18:00`  
+> **Current Version**: `v2.0.0`  
 
 ## Revision History
 | Version | Timestamp | Description |
@@ -22,6 +22,7 @@
 | `v1.12.0` | 2026-09-06 12:05:00 | Đưa bổ sung quy tắc mới (Push Dev, Master Approve, dùng MCP/Git, GitHub Issues Workflow) vào GEMINI.md & AGENTS.md |
 | `v1.13.0` | 2026-09-06 12:09:00 | Tạo file `README.md` giới thiệu sản phẩm khoa học & thế mạnh kỹ thuật |
 | `v1.14.0` | 2026-09-06 13:04:30 | Đã cài đặt Skill ECC (Everything Code) cho Antigravity tại `.agent/skills/ecc/SKILL.md` |
+| `v2.0.0` | 2026-09-15 22:18:00 | Nâng cấp v2.0.0: Profile/Preset System, Computer Vision Bot, Macro Editor, 96/96 Tests Passed |
 
 ---
 
@@ -68,3 +69,14 @@
 | TASK-37 | Bổ sung 4 quy tắc workspace mới (Push Dev, Master Approve, MCP/Git, GitHub Issues) | Completed | `GEMINI.md`, `.agent/AGENTS.md`, `docs/` | Đã cập nhật quy tắc trong GEMINI.md, AGENTS.md và docs |
 | TASK-38 | Viết tài liệu `README.md` giới thiệu sản phẩm chuyên nghiệp & kiến trúc khoa học | Completed | `README.md` | `README.md` được viết hoàn chỉnh với Badges, Diagram, Core Strengths & Guides |
 | TASK-39 | Cài đặt ECC Skill (Everything Code) cho Antigravity | Completed | `.agent/skills/ecc/SKILL.md` | Đã tạo file skill `.agent/skills/ecc/SKILL.md` phục vụ Antigravity |
+| TASK-40 | Xây dựng `ProfileModel` & `ProfileService` quản lý đa cấu hình (profiles) | Completed | `AutoClicker/Models/ProfileModel.cs`, `AutoClicker/Services/ProfileService.cs` | Viết unit test `ProfileServiceTests` (9 tests) PASS |
+| TASK-41 | Mở rộng `ActionItem` hỗ trợ các ActionType thị giác (`WaitForPixelColor`, `WaitForPixelChange`, `ConditionalPixelColor`) | Completed | `AutoClicker/Models/ActionItem.cs` | Viết unit test `ActionItemTests` mở rộng (6 tests) PASS |
+| TASK-42 | Xây dựng `ScreenCaptureService` xử lý thị giác máy tính Win32 GDI+ thuần (`GetPixel`, `CaptureRegion`, `CompareImages`, `FindPixelByColor`) | Completed | `AutoClicker/Services/ScreenCaptureService.cs` | Viết unit test `ScreenCaptureServiceTests` (8 tests) PASS |
+| TASK-43 | Xây dựng `PixelWatcherService` giám sát pixel/region background và phát hiện điều kiện | Completed | `AutoClicker/Services/PixelWatcherService.cs` | Viết unit test `PixelWatcherServiceTests` (5 tests) PASS |
+| TASK-44 | Tích hợp Profile Management & Vision Actions vào `MainViewModel` pipeline | Completed | `AutoClicker/ViewModels/MainViewModel.cs` | Tự động hóa chờ pixel, kiểm tra điều kiện màu, nạp/lưu cấu hình profile |
+| TASK-45 | Xây dựng tính năng Macro Editor: Move Up, Move Down, Duplicate Action | Completed | `AutoClicker/ViewModels/MainViewModel.cs`, `AutoClicker/MainWindow.xaml` | Unit test `MoveActionUpAndDown`, `DuplicateAction` PASS |
+| TASK-46 | Thiết kế giao diện Profile Selector, Vision Buttons (`🎯 Pixel Wait`, `👁️ Vision Watch`, `🎨 Pick Color`) | Completed | `AutoClicker/MainWindow.xaml` | Giao diện WPF tích hợp đầy đủ các tính năng mới |
+| TASK-47 | Bổ sung Panel Inspector `🎯 Action Details & Vision` điều chỉnh trực quan thông số TargetColor, Tolerance, Timeout | Completed | `AutoClicker/MainWindow.xaml` | Cập nhật TextBox binding trực tiếp vào SelectedAction |
+| TASK-48 | Đồng bộ phiên bản Assembly `2.0.0` vào `.csproj`, ViewModel & UI Header | Completed | `AutoClicker.csproj`, `MainViewModel.cs`, `MainWindow.xaml` | Version 2.0.0 hiển thị đồng nhất |
+| TASK-49 | Chạy toàn bộ Test Suite & Xác minh 100% Auto Tests PASS | Completed | `AutoClicker.Tests/` | `dotnet test` PASS 96/96 (100% Passed) |
+| TASK-50 | Cập nhật toàn bộ tài liệu nhóm trong `docs/` theo quy chuẩn | Completed | `docs/` | Cập nhật 4 nhóm tài liệu đầy đủ version 2.0.0 & timestamp |

@@ -7,7 +7,10 @@ namespace AutoClicker.Models
     public enum ActionType
     {
         Keyboard,
-        MouseClick
+        MouseClick,
+        WaitForPixelColor,
+        WaitForPixelChange,
+        ConditionalPixelColor
     }
 
     public enum MouseButtonType
@@ -25,6 +28,9 @@ namespace AutoClicker.Models
         private int _y;
         private ActionType _actionType;
         private MouseButtonType _mouseButton;
+        private string _targetColor = "#FFFFFF";
+        private int _colorTolerance = 10;
+        private int _timeoutMs = 5000;
 
         public ActionType ActionType
         {
@@ -92,17 +98,57 @@ namespace AutoClicker.Models
             }
         }
 
+        public string TargetColor
+        {
+            get => _targetColor;
+            set
+            {
+                _targetColor = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(DisplayValue));
+            }
+        }
+
+        public int ColorTolerance
+        {
+            get => _colorTolerance;
+            set
+            {
+                _colorTolerance = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(DisplayValue));
+            }
+        }
+
+        public int TimeoutMs
+        {
+            get => _timeoutMs;
+            set
+            {
+                _timeoutMs = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(DisplayValue));
+            }
+        }
+
         public string DisplayValue
         {
             get
             {
-                if (ActionType == ActionType.Keyboard)
+                switch (ActionType)
                 {
-                    return $"Key: {KeyOrButton}";
-                }
-                else
-                {
-                    return $"Click {MouseButton} at ({X}, {Y})";
+                    case ActionType.Keyboard:
+                        return $"Key: {KeyOrButton}";
+                    case ActionType.MouseClick:
+                        return $"Click {MouseButton} at ({X}, {Y})";
+                    case ActionType.WaitForPixelColor:
+                        return $"Wait Pixel ({X}, {Y}) == {TargetColor} (Tol: {ColorTolerance})";
+                    case ActionType.WaitForPixelChange:
+                        return $"Wait Pixel ({X}, {Y}) changes from {TargetColor}";
+                    case ActionType.ConditionalPixelColor:
+                        return $"If Pixel ({X}, {Y}) == {TargetColor} -> Press {KeyOrButton}";
+                    default:
+                        return $"Action ({ActionType})";
                 }
             }
         }
