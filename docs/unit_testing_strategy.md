@@ -1,8 +1,8 @@
 # Group 4: Automated Testing Strategy & Test Reports
 > **Group ID**: `testing_strategy`  
 > **File Path**: `docs/unit_testing_strategy.md`  
-> **Last Updated**: `2026-09-06 11:50:00`  
-> **Current Version**: `v1.3.0`  
+> **Last Updated**: `2026-09-15 22:18:00`  
+> **Current Version**: `v2.0.0`  
 
 ## Revision History
 | Version | Timestamp | Description |
@@ -11,12 +11,13 @@
 | `v1.1.0` | 2026-09-06 03:30:00 | Bổ sung test case cho service ghi thao tác `InputRecorderServiceTests` (47 test cases) |
 | `v1.2.0` | 2026-09-06 04:40:00 | Bổ sung test case cho Reset Hotkeys & Pause Button (51 test cases) |
 | `v1.3.0` | 2026-09-06 11:50:00 | Bổ sung test case cho phím Numpad (66 test cases) & Cập nhật chuẩn định dạng tài liệu nhóm |
+| `v2.0.0` | 2026-09-15 22:18:00 | Bổ sung test cases cho ProfileService, ScreenCaptureService, PixelWatcherService & Macro Editor (96 test cases) |
 
 ---
 
 ## 1. Goal & Testing Framework
 - **Framework**: xUnit (.NET 8.0 Windows), `Microsoft.NET.Test.Sdk`
-- **Current Test Coverage**: **66 / 66 Test Cases Passed (100%)**
+- **Current Test Coverage**: **96 / 96 Test Cases Passed (100%)**
 
 ---
 
@@ -37,9 +38,29 @@
 - Reading/writing String, Int, and Bool values.
 - Safe default fallback handling when keys/sections are missing.
 
-### D. ViewModel Logic & UI Commands (`MainViewModelTests`)
+### D. Profile Management (`ProfileServiceTests`) - NEW
+- Constructor default profile initialization.
+- Creating profiles, preventing duplicate/empty profile names.
+- Deleting custom profiles and preventing deletion of `Default` profile.
+- Renaming profiles safely.
+- Profile config path generation & active profile switching.
+
+### E. Computer Vision & Pixel Detection (`ScreenCaptureServiceTests`) - NEW
+- Exact color matching & tolerance color matching.
+- Color hex conversion (`ColorToHex` / `HexToColor`) roundtrip & fallback.
+- Pixel-by-pixel image comparison (`CompareImages`).
+- Region pixel search by color (`FindPixelByColor`).
+
+### F. Screen-Reactive Bot Engine (`PixelWatcherServiceTests`) - NEW
+- Adding, removing, clearing watch conditions.
+- Asynchronous background watcher event triggering on target color appearance (`WaitForColor`).
+- Asynchronous background watcher event triggering on pixel color change (`WaitForChange`).
+
+### G. ViewModel Logic, Macro Editor & UI Commands (`MainViewModelTests`)
 - Adding/deleting actions (`AddKeyboardAction`, `AddClickAction`, `DeleteAction`).
 - Loop mode selection & `IsCustomLoopVisible` toggle.
-- Hotkey persistent config save/load.
-- Reset hotkey commands (`F6`, `F7`, `F8`, `F9`, `ResetAll`).
-- Pause button text state toggle (`PauseButtonText`).
+- Hotkey persistent config save/load & reset commands.
+- Macro Editor: Move action up/down reordering (`MoveActionUpAndDown`).
+- Macro Editor: Duplicating selected action (`DuplicateAction`).
+- Profile dropdown initialization (`Profiles_PopulatedWithDefaultProfile`).
+- Assembly version format validation (`AppVersion_ReturnsFormattedAssemblyVersion`).

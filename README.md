@@ -1,50 +1,58 @@
-# 🎮 Auto Clicker & Keyboard Automation Tool (v1.5.0)
+# 🎮 Auto Clicker & Keyboard Automation Tool (v2.0.0)
 
-> **Hệ Thống Tự Động Hóa Bàn Phím & Chuột Hiệu Năng Cao Cho Windows (.NET 8.0 WPF)**
+> **Hệ Thống Tự Động Hóa Bàn Phím, Chuột & Bot Phản Xạ Màn Hình (Computer Vision) Cho Windows (.NET 8.0 WPF)**
 
 ![.NET 8.0](https://img.shields.io/badge/.NET-8.0--windows-512BD4?logo=dotnet)
 ![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen?logo=github-actions)
-![Tests](https://img.shields.io/badge/Unit%20Tests-67%2F67%20Passed-success)
-![Version](https://img.shields.io/badge/Version-1.5.0-blue)
+![Tests](https://img.shields.io/badge/Unit%20Tests-96%2F96%20Passed-success)
+![Version](https://img.shields.io/badge/Version-2.0.0-blue)
 ![Platform](https://img.shields.io/badge/Platform-Windows%20x64-0078D6?logo=windows)
 
 ---
 
 ## 🌟 Giới Thiệu Sản Phẩm (Overview)
 
-**AutoKeypressGame (`AutoClicker`)** là giải pháp phần mềm tự động hóa thao tác người dùng (Keyboard & Mouse Automation) thế hệ mới trên hệ điều hành Windows. Được xây dựng chuẩn hóa trên nền tảng **.NET 8.0 WPF (Windows Presentation Foundation)** và **Win32 Native Interop API**, ứng dụng giải quyết triệt để vấn đề giật lag, trễ thao tác và lãng phí tài nguyên CPU của các công cụ tự động truyền thống.
+**AutoKeypressGame (`AutoClicker`)** là giải pháp phần mềm tự động hóa thao tác người dùng (Keyboard & Mouse Automation) kết hợp **Thị giác máy tính (Computer Vision Bot Engine)** thế hệ mới trên hệ điều hành Windows. Được xây dựng chuẩn hóa trên nền tảng **.NET 8.0 WPF (Windows Presentation Foundation)** và **Win32 Native Interop API**, ứng dụng giải quyết triệt để vấn đề giật lag, trễ thao tác và lãng phí tài nguyên CPU của các công cụ tự động truyền thống.
 
-Ứng dụng đáp ứng hoàn hảo cho cả nhu cầu **Automation Testing**, **Tự động hóa công việc lặp đi lặp lại (RPA)** và **Tối ưu hóa trải nghiệm chơi game (Gaming Automation)**.
+Ứng dụng đáp ứng hoàn hảo cho cả nhu cầu **Automation Testing**, **Tự động hóa công việc lặp đi lặp lại (RPA)**, **Tự động phản xạ theo màn hình game (Screen-Reactive Gaming Bot)** và **Quản lý đa kịch bản (Multi-Profile Presets)**.
 
 ---
 
 ## 🚀 Các Điểm Mạnh Khoa Học & Kỹ Thuật Nổi Bật (Core Strengths)
 
-### 1. ⚙️ Động Cơ Giả Lập Win32 Native (`SendInput` Engine)
+### 1. 👁️ Động Cơ Thị Giác Máy Tính Tốc Độ Cao (Screen-Reactive Vision Bot)
+- Tích hợp `ScreenCaptureService` và `PixelWatcherService` sử dụng Win32 GDI+ thuần (`BitBlt`, `GetPixel`), không phụ thuộc thư viện bên ngoài cồng kềnh.
+- Hỗ trợ các hành động thị giác nâng cao:
+  - **`🎯 Pixel Wait`**: Tự động dừng luồng cho tới khi pixel tại tọa độ đạt đúng màu sắc mục tiêu (`#RRGGBB`) với mức dung sai (Tolerance 0-255).
+  - **`👁️ Vision Watch`**: Bot phản xạ thông minh — phát hiện màu sắc trên màn hình và tự động kích hoạt tổ hợp phím/chuột tương ứng.
+  - **`🎨 Pick Color`**: Trích xuất mã màu và tọa độ tức thời tại vị trí con trỏ chuột.
+
+### 2. 📁 Hệ Thống Đa Cấu Hình & Preset Độc Lập (Multi-Profile System)
+- Quản lý linh hoạt danh sách cấu hình (`ProfileService`), lưu trữ độc lập tại `profiles/{ProfileName}/config.ini`.
+- Chuyển đổi nhanh chóng giữa các kịch bản chơi game / công việc khác nhau ngay trên thanh Header bar mà không cần khởi động lại ứng dụng.
+
+### 3. 📋 Trình Chỉnh Sửa Kịch Bản Trực Quan (Macro Editor & Inspector)
+- Hỗ trợ sắp xếp lại thứ tự bước chạy bằng nút `↑ Move Up` / `↓ Move Down`.
+- Nhân bản nhanh bước thao tác bằng nút `📋 Duplicate`.
+- Bảng **`🎯 Action Details & Vision`** bên phải cho phép điều chỉnh trực tiếp phím bấm, thời gian delay, màu sắc và timeout của từng hành động.
+
+### 4. ⚙️ Động Cơ Giả Lập Win32 Native (`SendInput` Engine)
 - Sử dụng trực tiếp Win32 API `SendInput` để bơm sự kiện bàn phím/chuột ở cấp độ nhân (Kernel-level simulation).
 - Chuẩn hóa cấu trúc bộ nhớ `INPUT` struct với `uint` alignment chuẩn xác cho kiến trúc x64, ngăn ngừa lỗi sai lệch bộ nhớ (memory misalignment) và xung đột tiến trình.
-- Loại bỏ hoàn toàn cơ chế CPU-busy spinning (vòng lặp vô tận tiêu tốn CPU), giữ ứng dụng chạy nhẹ nhàng với **< 0.5% CPU Usage**.
+- Giữ ứng dụng chạy nhẹ nhàng với **< 0.5% CPU Usage**.
 
-### 2. 🔴 Bộ Ghi Thao Tác Thời Gian Thực (Low-Level Hook Input Recorder)
+### 5. 🔴 Bộ Ghi Thao Tác Thời Gian Thực (Low-Level Hook Input Recorder)
 - Tích hợp service `InputRecorderService` sử dụng Win32 Hooks (`WH_KEYBOARD_LL` và `WH_MOUSE_LL`) để bắt trọn từng thao tác phím bấm, nhấp chuột và tọa độ màn hình `(X, Y)` với khoảng trễ trôi qua (delay) thực tế tính bằng miligiây.
-- Hỗ trợ ghi nhận chính xác trình tự hành động lặp phức tạp và phát lại với độ trễ theo mong muốn.
 
-### 3. ⌨️ Hỗ Trợ Toàn Diện Bàn Phím Số Sub-Keypad (Full Numpad Support)
-- Khắc phục hoàn toàn hạn chế ép mã ASCII của phím Numpad Win32 API.
+### 6. ⌨️ Hỗ Trợ Toàn Diện Bàn Phím Số Sub-Keypad (Full Numpad Support)
 - Ánh xạ chuẩn xác 100% tất cả các phím số phụ **Numpad 0 đến Numpad 9** (`VK_NUMPAD0` - `VK_NUMPAD9`), các phím phép tính toán tử (`+`, `-`, `*`, `/`, `.`, `,`) và trạng thái phím **NumLock**.
 
-### 4. ⚡ Hệ Thống Phím Tắt Toàn Cục An Toàn (Win32 Global Hotkeys)
+### 7. ⚡ Hệ Thống Phím Tắt Toàn Cục An Toàn (Win32 Global Hotkeys)
 - Lắng nghe 4 phím tắt nhanh (`F6`: Start/Stop, `F7`: Record, `F8`: Pause/Resume, `F9`: Clear Actions) trên toàn hệ điều hành thông qua Win32 API `RegisterHotKey` gắn với WPF `HwndSource` Hook.
-- Cho phép điều khiển ứng dụng tức thì ngay cả khi ứng dụng đang thu nhỏ hoặc không được focus.
 
-### 5. 🎯 Giao Diện Người Dùng Tương Tác Trực Quan (Modern Interactive WPF UI)
-- **Cơ chế Bắt Phím Trực Quan (Focus Prompt)**: Nhấp vào ô gán phím tắt sẽ tự động chuyển sang chế độ chờ `"Press key..."`, tự động phân tích tổ hợp phím (`CTRL`, `ALT`, `SHIFT`, `NUMPAD`) và giải phóng focus ngay khi hoàn tất.
-- **Đồng Nhất Giao Diện**: Icon emojis và nhãn điều khiển được đồng bộ hoàn toàn giữa bảng Cài đặt và Thanh nút thao tác bên dưới.
-- **Nút Khôi Phục Nhanh (`Reset Hotkeys`)**: Tích hợp các nút `↺` và `🔄 Reset All Hotkeys` cho phép đưa phím tắt về thiết lập mặc định trong 1 click.
-
-### 6. 🧪 Kiểm Thử Tự Động 100% & CI/CD Pipeline (xUnit & GitHub Actions)
-- Bộ kiểm thử tự động với **67 / 67 Test Cases PASS (100%)** phủ rộng các module `InputSimulator`, `InputRecorder`, `IniFileService` và `MainViewModel`.
-- Tự động hóa quy trình tích hợp và đóng gói liên tục (CI/CD Workflows) qua GitHub Actions (`.github/workflows/cli.yml` và `deploy.yml`).
+### 8. 🧪 Kiểm Thử Tự Động 100% & CI/CD Pipeline (xUnit & GitHub Actions)
+- Bộ kiểm thử tự động với **96 / 96 Test Cases PASS (100%)** phủ rộng toàn bộ các modules.
+- Tự động hóa quy trình tích hợp và đóng gói liên tục qua GitHub Actions (`.github/workflows/cli.yml` và `deploy.yml`).
 
 ---
 
@@ -53,12 +61,16 @@
 ```mermaid
 flowchart TD
     UI[🖥️ WPF User Interface / MainWindow] -->|Data Binding / Commands| VM[🧠 MainViewModel]
-    VM -->|Config Persistence| INI[📄 IniFileService - config.ini]
+    VM -->|Multi-Profile System| PS[📁 ProfileService - profiles/]
+    PS -->|Config Persistence| INI[📄 IniFileService]
     VM -->|Automation Exec| SIM[⚡ InputSimulatorService]
     VM -->|Record Input| REC[🔴 InputRecorderService]
+    VM -->|Computer Vision Bot| SCS[👁️ ScreenCaptureService]
+    VM -->|Background Monitor| PWS[📡 PixelWatcherService]
     
     SIM -->|Win32 SendInput| WIN32[🪟 Windows OS Kernel]
-    REC -->|Win32 WH_KEYBOARD_LL / WH_MOUSE_LL| WIN32
+    REC -->|Win32 Hooks WH_KEYBOARD_LL / WH_MOUSE_LL| WIN32
+    SCS -->|Win32 GetDC / BitBlt / GDI+| WIN32
     UI -->|HwndSource Hook / RegisterHotKey| WIN32
 ```
 

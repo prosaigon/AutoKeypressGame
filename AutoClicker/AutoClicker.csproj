@@ -9,13 +9,13 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <RootNamespace>AutoClicker</RootNamespace>
     <AssemblyName>AutoClicker</AssemblyName>
-    <Version>1.5.0</Version>
-    <AssemblyVersion>1.5.0.0</AssemblyVersion>
-    <FileVersion>1.5.0.0</FileVersion>
-    <InformationalVersion>1.5.0</InformationalVersion>
+    <Version>2.0.0</Version>
+    <AssemblyVersion>2.0.0.0</AssemblyVersion>
+    <FileVersion>2.0.0.0</FileVersion>
+    <InformationalVersion>2.0.0</InformationalVersion>
     <Product>Auto Clicker &amp; Keyboard</Product>
     <Title>Auto Clicker &amp; Keyboard</Title>
-    <Description>Modern Auto Tool for Keyboard and Mouse Automation</Description>
+    <Description>Modern Auto Tool for Keyboard, Mouse Automation &amp; Computer Vision Bot</Description>
   </PropertyGroup>
 
 </Project>

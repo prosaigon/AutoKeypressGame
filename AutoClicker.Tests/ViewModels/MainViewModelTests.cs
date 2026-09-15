@@ -136,6 +136,72 @@ namespace AutoClicker.Tests.ViewModels
         }
 
         [Fact]
+        public void MoveActionUpAndDown_ChangesActionOrder()
+        {
+            var vm = new MainViewModel();
+            vm.Actions.Clear();
+
+            var a1 = new ActionItem { KeyOrButton = "1" };
+            var a2 = new ActionItem { KeyOrButton = "2" };
+            var a3 = new ActionItem { KeyOrButton = "3" };
+
+            vm.Actions.Add(a1);
+            vm.Actions.Add(a2);
+            vm.Actions.Add(a3);
+
+            vm.SelectedAction = a2;
+            vm.MoveActionUp();
+
+            Assert.Equal(0, vm.Actions.IndexOf(a2));
+            Assert.Equal(1, vm.Actions.IndexOf(a1));
+
+            vm.MoveActionDown();
+            Assert.Equal(1, vm.Actions.IndexOf(a2));
+            Assert.Equal(0, vm.Actions.IndexOf(a1));
+        }
+
+        [Fact]
+        public void DuplicateAction_ClonesSelectedItem()
+        {
+            var vm = new MainViewModel();
+            vm.Actions.Clear();
+
+            var item = new ActionItem
+            {
+                ActionType = ActionType.WaitForPixelColor,
+                X = 120,
+                Y = 340,
+                TargetColor = "#AABBCC",
+                ColorTolerance = 12,
+                TimeoutMs = 3000,
+                Delay = 250
+            };
+            vm.Actions.Add(item);
+            vm.SelectedAction = item;
+
+            vm.DuplicateAction();
+
+            Assert.Equal(2, vm.Actions.Count);
+            var cloned = vm.Actions[1];
+            Assert.Equal(ActionType.WaitForPixelColor, cloned.ActionType);
+            Assert.Equal(120, cloned.X);
+            Assert.Equal(340, cloned.Y);
+            Assert.Equal("#AABBCC", cloned.TargetColor);
+            Assert.Equal(12, cloned.ColorTolerance);
+            Assert.Equal(3000, cloned.TimeoutMs);
+            Assert.Equal(250, cloned.Delay);
+        }
+
+        [Fact]
+        public void Profiles_PopulatedWithDefaultProfile()
+        {
+            var vm = new MainViewModel();
+            Assert.NotEmpty(vm.Profiles);
+            Assert.Contains(vm.Profiles, p => p.Name == ProfileService.DefaultProfileName);
+            Assert.NotNull(vm.SelectedProfile);
+        }
+
+        [Fact]
         public void AppVersion_ReturnsFormattedAssemblyVersion()
         {
             var vm = new MainViewModel();

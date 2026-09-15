@@ -1,8 +1,8 @@
 # Group 3: System Features & Technical Design
 > **Group ID**: `feature_design`  
 > **File Path**: `docs/system_features_design.md`  
-> **Last Updated**: `2026-09-06 12:09:00`  
-> **Current Version**: `v1.9.0`  
+> **Last Updated**: `2026-09-15 22:18:00`  
+> **Current Version**: `v2.0.0`  
 
 ## Revision History
 | Version | Timestamp | Description |
@@ -17,6 +17,8 @@
 | `v1.7.0` | 2026-09-06 12:00:30 | Cập nhật `cli.yml` kích hoạt CI build/test tự động cho nhánh `Dev` |
 | `v1.8.0` | 2026-09-06 12:01:30 | Thiết lập quy trình Merge PR từ `Dev` sang `main`/`master` (Cần Review Approval & CI Status Check) |
 | `v1.9.0` | 2026-09-06 12:09:00 | Xây dựng tài liệu `README.md` giới thiệu sản phẩm chuyên sâu & kiến trúc khoa học |
+| `v1.10.0` | 2026-09-06 13:04:30 | Cài đặt Skill ECC (Everything Code) cho Antigravity tại `.agent/skills/ecc/SKILL.md` |
+| `v2.0.0` | 2026-09-15 22:18:00 | Bổ sung Profile/Preset System, Computer Vision Bot, Macro Editor & Inspector Panel |
 
 ---
 
@@ -81,3 +83,52 @@ Quy định chặt chẽ luồng tích hợp mã nguồn khi nhánh `Dev` đã h
 
 ### Description
 Xây dựng tài liệu tổng quan giới thiệu sản phẩm chuyên nghiệp, thể hiện rõ thế mạnh kỹ thuật (Win32 `SendInput` Kernel Simulation, Low-Level Hooks Input Recorder, Full Numpad Support, Interactive Focus UI, 100% Automated Test Suite, CI/CD Pipeline), hướng dẫn build/run và sơ đồ kiến trúc hệ thống bằng Mermaid Diagram.
+
+---
+
+## 8. Feature 8: ECC (Everything Code) Skill Integration
+
+### Description
+Tích hợp Skill **ECC (Everything Code)** cho Antigravity tại đường dẫn `.agent/skills/ecc/SKILL.md`. Định nghĩa chuẩn hóa các quy trình phát triển agentic: Single-flow Execution, Deep Code Analysis, Test-Driven Verification, Grouped Documentation & Versioning, Git Dev Branch & GitHub Issue Workflow.
+
+---
+
+## 9. Feature 9: Profile & Preset System (`ProfileService`)
+
+### Description
+Cho phép người dùng tạo, xóa, chuyển đổi và lưu trữ độc lập nhiều cấu hình (Profiles) khác nhau cho từng tựa game hoặc tác vụ:
+1. **Lưu trữ độc lập**: Mỗi profile có thư mục con riêng tại `profiles/{ProfileName}/config.ini`.
+2. **Profile mặc định**: Luôn duy trì profile `Default` an toàn, tự động migrate dữ liệu từ `config.ini` gốc.
+3. **Chuyển đổi tức thời**: ComboBox chọn Profile trên thanh Header bar tự động nạp danh sách hành động và phím tắt của Profile được chọn.
+
+---
+
+## 10. Feature 10: Computer Vision & Screen-Reactive Bot Engine
+
+### Description
+Tích hợp thị giác máy tính Win32 GDI+ thuần tốc độ cao, không cần phụ thuộc thư viện nặng ngoài:
+1. **ScreenCaptureService**:
+   - `GetPixelColor(x, y)`: Đọc mã màu pixel tức thời bằng Win32 `GetDC`/`GetPixel`.
+   - `ColorToHex` & `HexToColor`: Chuyển đổi định dạng mã màu `#RRGGBB`.
+   - `ColorsMatch`: So khớp màu sắc với độ lệch dung sai (Tolerance 0-255).
+   - `CaptureRegion` & `CompareImages`: Chụp ảnh vùng màn hình và so sánh pixel-by-pixel.
+   - `FindPixelByColor`: Tìm kiếm tọa độ pixel mục tiêu trong vùng quét.
+2. **PixelWatcherService**:
+   - Chạy background worker giám sát đa điều kiện (WaitForColor, WaitForChange, ContinuousMonitor).
+3. **Vision Action Items**:
+   - `WaitForPixelColor`: Tạm dừng luồng tự động cho đến khi pixel tại (X, Y) đạt đúng màu `TargetColor`.
+   - `WaitForPixelChange`: Tạm dừng luồng cho đến khi pixel tại (X, Y) đổi màu.
+   - `ConditionalPixelColor`: Bot phản xạ thông minh — kiểm tra màu màn hình, nếu khớp điều kiện thì tự động kích hoạt phím tắt chỉ định.
+
+---
+
+## 11. Feature 11: Macro Editor & Action Inspector
+
+### Description
+1. **Macro Sequence Ordering**:
+   - Hỗ trợ di chuyển hành động lên (`↑ Move Up`) / xuống (`↓ Move Down`) linh hoạt trong danh sách.
+   - Hỗ trợ nhân bản nhanh (`📋 Duplicate Action`) các bước lặp lại.
+2. **Action Details & Vision Inspector Panel**:
+   - Panel trực quan bên phải cho phép chỉnh sửa trực tiếp `Key/Button`, `Delay`, `TargetColor`, `ColorTolerance`, và `TimeoutMs` của hành động đang chọn.
+3. **Pixel Picker Tool**:
+   - Nút `🎨 Pick Color` và `🎯 Pixel Wait` cho phép lấy nhanh màu sắc và tọa độ tại vị trí con trỏ chuột hiện tại.
